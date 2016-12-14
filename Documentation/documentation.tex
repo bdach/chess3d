@@ -18,11 +18,11 @@
 	\vspace{1cm}
 	\includegraphics[width=0.2\textwidth]{logo.png} \par
 	\vspace{5cm}
-	{\LARGE Tytuł projektu \par}
+	{\LARGE Szachy -- Wizualizacja 3D \par}
 	\vspace{0.5cm}
-	{\Large Autorzy \par}
+	{\Large Bartłomiej Dach \par}
 	\vspace{1.5cm}
-	{\Large Nr wersji dokumentu \par}
+	{\Large Wersja 1.0 \par}
 	\vspace{1.5cm}
 	{\Large \today \par}
 \end{titlepage}
@@ -33,7 +33,7 @@ Lista zmian w dokumencie:
 	\hline
 	\textbf{Data} & \textbf{Autor} & \textbf{Opis zmian} & \textbf{Wersja} \\
 	\hline
-	11.10.2016 & Bartłomiej Dach & Stworzenie szablonu \LaTeX & 1.0 \\
+	14.12.2016 & Bartłomiej Dach & Dodanie specyfikacji wymagań & 1.0 \\
 	\hline
 \end{tabularx}
 \end{table}
@@ -44,10 +44,7 @@ Lista zmian w dokumencie:
 \section{Specyfikacja}
 
 \subsection{Opis biznesowy}
-% Punkt obowiązkowy.
-%
-% W niniejszym punkcie należy zawrzeć, jaki jest cel tworzonego systemu/aplikacji, jakie funkcje ma on
-% spełniać i kto jest jego użytkownikiem.
+Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wizualizacji 3D przedstawiającej scenę z szachownicą oraz pionkami szachowymi. Użytkownik może modyfikować parametry wyświetlania sceny oraz poruszać pionkami na szachownicy.
 
 \subsection{Wymagania biznesowe}
 % Punkt obowiązkowy.
@@ -57,7 +54,40 @@ Lista zmian w dokumencie:
 % pomocniczo: scenariusze użycia.
 
 \subsubsection*{Przypadki użycia}
-\subsubsection*{User stories}
+%\subsubsection*{User stories}
+
+\begin{table}[H]
+	\begin{tabularx}{\textwidth}{|l|X|X|}
+		\hline
+		\textbf{Nazwa} & \textbf{Opis} & \textbf{Odpowiedź systemu} \\
+		\hline
+		Zmiana kamery &
+		Zmiana kamery w wizualizacji na jedną z trzech poniższych opcji:
+		& Aktualizacja wizualizacji uwzględniająca wybór kamery.
+		\\
+		& $\bullet$ kamera nieruchoma, z widokiem na całą scenę, & \\
+		& $\bullet$ kamera nieruchoma, śledząca ostatnio poruszony pionek, & \\
+		& $\bullet$ kamera ruchoma, związana z ostatnio poruszonym pionkiem. & \\
+		\hline
+		Zmiana oświetlenia &
+		Zmiana modelu oświetlenia sceny na model Phonga \cite{phong75} lub model Blinna \cite{blinn77} &
+		Aktualizacja wizualizacji uwzględniająca wybrany model oświetlenia. \\
+		\hline
+		Zmiana cieniowania &
+		Zmiana trybu cieniowania sceny na jeden z poniższych: &
+		Aktualizacja wizualizacji uwzględniająca wybrany tryb cieniowania. \\
+		& $\bullet$ cieniowanie stałe, & \\
+		& $\bullet$ cieniowanie Gourauda \cite{gouraud71}, & \\
+		& $\bullet$ cieniowanie Phonga \cite{phong75}. & \\
+		\hline
+		Poruszanie pionkiem &
+		Przesunięcie pionka na nowe pole po wybraniu pionka i pola. &
+		Animacja poruszania się pionka, wyświetlana w czasie rzeczywistym. \\
+		\hline
+		% TODO: coś więcej?
+	\end{tabularx}
+	\caption{Opisy przypadków użycia}
+\end{table}
 
 \subsection{Wymagania niefunkcjonalne}
 % Punkt obowiązkowy.
@@ -75,6 +105,27 @@ Lista zmian w dokumencie:
 % danych, których istnienie zależy od specyfiki branży i systemu
 % Zadaniem prowadzącego jest zdefiniowanie jakie obszary wymagań niefunkcjonalnych poza URPS
 % powinny być wyspecyfikowane.
+
+\begin{table}[H]
+	\begin{tabularx}{\textwidth}{|l|X|}
+		\hline
+		\textbf{Obszar wymagań} & \textbf{Opis} \\
+		\hline
+		Użyteczność & Aplikacja powinna posiadać dwa tryby działania: okienkowy oraz pełnego ekranu. \\
+		\hline
+		Niezawodność &  \\
+		\hline
+		Wydajność & Aplikacja powinna być w stanie generować kolejne klatki obrazu w czasie krótszym niż 1 sekunda (płynność większa niż 1 klatka na sekundę). \\
+		\cline{2-2}
+		& Aplikacja powinna zajmować mniej niż 500 MB pamięci RAM systemu. \\
+		\hline
+		Utrzymanie & Wraz z aplikacją zostanie dołączona instrukcja obsługi. \\
+		\cline{2-2}
+		& Aplikacja będzie wspierała wczytywanie modeli pionków szachowych z plików \texttt{.obj}. \\
+		\hline
+	\end{tabularx}
+	\caption{Lista wymagań niefunkcjonalnych dla aplikacji}
+\end{table}
 
 \subsection{Harmonogram projektu}
 % Punkt obowiązkowy.
@@ -203,11 +254,25 @@ Lista zmian w dokumencie:
 \renewcommand*{\refname}{\vspace*{-2em}}
 \section{Bibliografia}
 \begin{thebibliography}{99}
-\bibitem{lamport94}
-  Leslie Lamport,
-  \emph{\LaTeX: a document preparation system},
-  Addison Wesley, Massachusetts,
-  2nd edition,
-  1994.
+
+\bibitem{blinn77}
+	James F. Blinn,
+	\emph{Models of Light Reflection for Computer Synthesized Pictures},
+	Proceedings of the 4th Annual Conference on Computer Graphics and Interactive Techniques,
+	pp. 192-198.
+	
+\bibitem{gouraud71}
+	Henri Gouraud,
+	\emph{Continuous Shading of Curved Surfaces},
+	IEEE Transactions on Computers,
+	June 1971, Volume C-20, Number 6,
+	pp. 87-93.
+
+\bibitem{phong75}
+	Bui Tuong Phong,
+	\emph{Illumination for Computer Generated Pictures},
+	Communications of the ACM,
+	June 1975, Volume 18, Number 6,
+	pp. 311-317.
 \end{thebibliography}
 \end{document}

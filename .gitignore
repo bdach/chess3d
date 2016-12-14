@@ -1,0 +1,7 @@
+/Documentation/*.gz
+/Documentation/*.toc
+/Documentation/*.aux
+/Documentation/*.dvi
+/Documentation/*.log
+/Documentation/*.out
+/Documentation/*.pdf
