@@ -1,0 +1,213 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{helvet}
+\usepackage{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[polish]{babel}
+\usepackage{float}
+
+\renewcommand\familydefault{\sfdefault}
+
+\begin{document}
+\begin{titlepage}
+	\centering
+	{\Large Wydział Matematyki i Nauk Informacyjnych Politechniki Warszawskiej \par}
+	\vspace{1cm}
+	\includegraphics[width=0.2\textwidth]{logo.png} \par
+	\vspace{5cm}
+	{\LARGE Tytuł projektu \par}
+	\vspace{0.5cm}
+	{\Large Autorzy \par}
+	\vspace{1.5cm}
+	{\Large Nr wersji dokumentu \par}
+	\vspace{1.5cm}
+	{\Large \today \par}
+\end{titlepage}
+Lista zmian w dokumencie:
+\begin{table}[H]
+\def\arraystretch{1.5}
+\begin{tabularx}{\textwidth}{|l|l|X|l|}
+	\hline
+	\textbf{Data} & \textbf{Autor} & \textbf{Opis zmian} & \textbf{Wersja} \\
+	\hline
+	11.10.2016 & Bartłomiej Dach & Stworzenie szablonu \LaTeX & 1.0 \\
+	\hline
+\end{tabularx}
+\end{table}
+
+\tableofcontents
+\newpage
+
+\section{Specyfikacja}
+
+\subsection{Opis biznesowy}
+% Punkt obowiązkowy.
+%
+% W niniejszym punkcie należy zawrzeć, jaki jest cel tworzonego systemu/aplikacji, jakie funkcje ma on
+% spełniać i kto jest jego użytkownikiem.
+
+\subsection{Wymagania biznesowe}
+% Punkt obowiązkowy.
+%
+% W niniejszym punkcie należy zawrzeć, wymagania tworzonego systemu/aplikacji, dozwolone formy:
+% diagramy przypadków użycia wraz z opisem, historie użytkownika (user stories) wraz z opisem,
+% pomocniczo: scenariusze użycia.
+
+\subsubsection*{Przypadki użycia}
+\subsubsection*{User stories}
+
+\subsection{Wymagania niefunkcjonalne}
+% Punkt obowiązkowy.
+%
+% Rozdział zawierać powinien listę wymagań niefunkcjonalnych oraz ich opis najlepiej w formie tabeli. W
+% uchwyceniu wymagań funkcjonalnych przydatna jest klasyfikacja wymagań FURPS+.
+% FURPS jest akronimem od:
+% - Functionality – wymaganie funkcjonalne, przedstawione powyżej
+% - Usability – wymagania związane z użytecznością i ergonomią systemu
+% - Reliability – wymaganie związane z niezawodnością i dostępnością systemu
+% - Performance – wymagania związane z wydajnością systemu
+% - Supportability – wymagania związane z utrzymaniem systemu
+% + ma za zadanie przypominać o szczególnych wymaganiach związanych np. z koniecznością użycia
+% konkretnej technologii, wzorców projektowych, metodyki zarządzania projektem, bezpieczeństwem
+% danych, których istnienie zależy od specyfiki branży i systemu
+% Zadaniem prowadzącego jest zdefiniowanie jakie obszary wymagań niefunkcjonalnych poza URPS
+% powinny być wyspecyfikowane.
+
+\subsection{Harmonogram projektu}
+% Punkt obowiązkowy.
+%
+% Rozdział powinien zawierać harmonogram projektu obejmujący co najmniej kamienie
+% milowe.
+% Celem tworzenia harmonogramu jest oczywiście zaplanowanie prac nad projektem, co w
+% szczególności pozwala m.in. na identyfikację następstwa zadań w projekcie. Ważnym
+% efektem jest często stwierdzenie, iż np. projekt wymaga szybkiego uruchomienia pierwszych
+% zadań i/lub ich częściowo równoległej realizacji, gdyż bez podjęcia tych działań zakończenie
+% projektu w planowanym terminie będzie trudne bądź niemożliwe. Harmonogram projektu
+% zawarty w tym punkcie musi definiować co najmniej kamienie milowe, aczkolwiek z przyczyn
+% powyżej zalecane jest również wydzielenie zadań o czasie trwania rzędu jednego - trzech
+% tygodni lub dłuższym (stopień szczegółowości zależny od czasu trwania całego projektu).
+% Wśród kamieni milowych należy wyróżnić co najmniej poniższe:
+% - zakończenie analizy kluczowych wymagań odzwierciedlone w punktach 1.1, 1.2 i 1.3
+%   niniejszego  dokumentu.  Wymagania  powinny  być  aprobowane  przez  wszystkich
+%   interesariuszy (tu: wykonawców i osoby oceniające projekt)
+% - zakończenie i uzgodnienie z prowadzącym specyfikacji (rozdział 1)
+% - uzyskanie stabilnej architektury rozwiązania (opisanej w punkcie 1.5 i potwierdzonej np.
+%   wstępną implementacją)
+% - gotowość aplikacji stworzonej w ramach projektu do użycia
+% - zakończenie dokumentacji (rozdział 2 i 3) i naniesienie zmian wynikających z testów w
+%   aplikacji
+% Uwaga: praca nad analizą wymagań nie wyklucza podejmowania równolegle prac nad architekturą,
+% czy też wstępnej implementacji.
+% 
+% Opis powinien mieć postać tabeli z listą zadań i kamieni milowych, ich terminami
+% rozpoczęcia i zakończenia oraz opcjonalnie diagramu Gantta, który przedstawia te
+% informacje oraz zależności pomiędzy zadaniami w formie graficznej.
+
+\subsection{Architektura rozwiązania}
+% Punkt obowiązkowy.
+% 
+% Rozdział powinien zawierać schemat i opis architektury tworzonego z rozbiciem na poszczególne
+% komponenty wchodzące w jej skład. W przypadku bardziej rozbudowanych systemów architekturę
+% można opisać w formie ogólnej (pierwszy schemat) i w kolejnym kroku uszczegółowić (w kolejnym
+% schemacie(ach)) co zapewni wymaganą przejrzystość rysunków. Należy również zamieścić
+% uzasadnienie wybranej architektury.
+
+\section{Dokumentacja końcowa (powykonawcza)}
+
+\subsection{Wymagania systemowe}
+% Punkt obowiązkowy.
+%
+% Rozdział powinien zawierać wymagania systemowe, wymagane oprogramowanie zewnętrzne
+% (RDBMS, etc.)
+
+\subsection{Biblioteki wraz z określeniem licencji}
+% Punkt obowiązkowy.
+%
+% Rozdział powinien zawierać listę użytych bibliotek i komponentów firm trzecich wraz z ich licencjami.
+
+\subsection{Instrukcja instalacji}
+% Punkt obowiązkowy.
+%
+% Niniejszy rozdział powinien kompletną instrukcję instalacji systemu/aplikacji umożliwiająca osobie
+% oceniającej implementację danego rozwiązania. Uwaga: instrukcja powinna być dostoswana do
+% instalacji na czystym systemie operacyjnym.
+
+\subsection{Instrukcja uruchomienia}
+% Punkt obowiązkowy.
+% 
+% Niniejszy rozdział powinien zawierać kompletną instrukcję uruchomienia systemu/aplikacji
+% umożliwiającą osobie oceniającej weryfikację poprawności działania systemu.
+
+\subsection{Instrukcja użycia}
+% Punkt obowiązkowy.
+%
+% Niniejszy rozdział powinien zawierać kompletną instrukcję użycia (manual) systemu/aplikacji
+% umożliwiająca osobie oceniającej weryfikację poprawności działania systemu.
+
+\subsection{Instrukcja utrzymania}
+% Punkt obowiązkowy.
+%
+% Niniejszy rozdział powinien zawierać kompletną instrukcję utrzymania systemu obejmującą procedury
+% włączenia, wyłączenia systemu oraz procedury backup/restore.
+
+\subsection{Raport odstępstw od specyfikacji wymagań}
+% Punkt obowiązkowy.
+
+\subsection{Dokumentacja usług Web Services}
+% Punkt obowiązkowy
+%
+% Niniejszy rozdział powinien w przypadku, gdy system udostępnia publiczne usługi web services
+% powinien zawierać dokumentację usług zamieszczone w formie opisowej lub np. wg specyfikacji
+% swagger.
+
+\section{Dokumentacja końcowa (powykonawcza) -- punkty wymagane przez prowadzącego zajęcia}
+
+\subsection{Pseudokod}
+
+\subsection{Diagramy sekwencji}
+% Punkt obowiązkowy
+%
+% W przypadku projektów półsemestralnych lub dłuższych: w przypadku, gdy system składa się z
+% komponentów rozproszonych należy dołączyć diagram(y) sekwencji. Rozdział zawierać powinien
+% zawierać diagramy sekwencji opisujące komunikację pomiędzy systemami lub komponentami
+% systemu. Należy w nim uwzględnić wszystkie przepływy komunikatów pomiędzy komponentami
+% systemu lub systemami.
+
+\subsection{Model danych}
+% W przypadku projektów półsemestralnych lub dłuższych, gdy system składuje dane, należy opisać
+% model danych. Model danych powinien być wyrażony przez diagram entity relationship w przypadku
+% relacyjnej bazy danych. Zalecane jest wówczas opisanie znaczenia poszczególnych relacji, jak
+% również czytelne oznaczenie rodzaju relacji (np. jeden do wielu) oraz kluczy głównych i kluczy obcych.
+% W przypadku wykorzystania platform nierelacyjnych np. platform NoSQL lub składowania danych w
+% plikach Apache Hadoop należy przedstawić opis konwencji zapisu danych. Jest to szczególnie istotne,
+% gdy model danych jest prowadzony w trybie tzw. schema-on-read tzn. nie jest egzekwowany przez
+% platformę składowania danych, a zależy wyłącznie od konwencji stosowanej przez aplikację np.
+% konwencji nazewnictwa kolumn, treści wpisów w formacie JSON lub formatu sekwencji plików
+% tworzonych w systemie plików HDFS.
+
+\subsection{Scenariusz testów akceptacyjnych}
+% W przypadku projektów półsemestralnych np. realizowanych w ramach projektu zespołowego.
+% Rozdział powinien zawierać scenariusze testów akceptacyjnych nawiązujących do wymagań
+% funkcjonalnych i niefunkcjonalnych systemu.
+
+\subsection{Raport z przeprowadzonych testów}
+% W przypadku projektów półsemestralnych np. realizowanych w ramach projektu zespołowego.
+% Rozdział powinien zawierać scenariusze testów akceptacyjnych nawiązujących do wymagań
+% funkcjonalnych i niefunkcjonalnych systemu i wyniki ich przeprowadzenia.
+
+\section{Lista użytych skrótów}
+
+\renewcommand*{\refname}{\vspace*{-2em}}
+\section{Bibliografia}
+\begin{thebibliography}{99}
+\bibitem{lamport94}
+  Leslie Lamport,
+  \emph{\LaTeX: a document preparation system},
+  Addison Wesley, Massachusetts,
+  2nd edition,
+  1994.
+\end{thebibliography}
+\end{document}
