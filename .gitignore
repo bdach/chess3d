@@ -4,4 +4,4 @@
 /Documentation/*.dvi
 /Documentation/*.log
 /Documentation/*.out
-/Documentation/*.pdf
+/Documentation/documentation.pdf

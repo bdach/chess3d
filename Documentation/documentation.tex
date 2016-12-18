@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{helvet}
+\usepackage{verbatim}
 \usepackage{hyperref}
 \usepackage[a4paper,margin=1in]{geometry}
 \usepackage[polish]{babel}
@@ -18,11 +19,11 @@
 	\vspace{1cm}
 	\includegraphics[width=0.2\textwidth]{logo.png} \par
 	\vspace{5cm}
-	{\LARGE Szachy -- Wizualizacja 3D \par}
+	{\LARGE Chess3D -- wizualizacja gry w szachy \par}
 	\vspace{0.5cm}
 	{\Large Bartłomiej Dach \par}
 	\vspace{1.5cm}
-	{\Large Wersja 1.0 \par}
+	{\Large Wersja 1.1 \par}
 	\vspace{1.5cm}
 	{\Large \today \par}
 \end{titlepage}
@@ -35,6 +36,8 @@ Lista zmian w dokumencie:
 	\hline
 	14.12.2016 & Bartłomiej Dach & Dodanie specyfikacji wymagań & 1.0 \\
 	\hline
+	15.12.2016 & Bartłomiej Dach & Rozszerzenie opisu biznesowego, dodanie szkicu architektury & 1.1 \\
+	\hline
 \end{tabularx}
 \end{table}
 
@@ -44,17 +47,54 @@ Lista zmian w dokumencie:
 \section{Specyfikacja}
 
 \subsection{Opis biznesowy}
-Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wizualizacji 3D przedstawiającej scenę z szachownicą oraz pionkami szachowymi. Użytkownik może modyfikować parametry wyświetlania sceny oraz poruszać pionkami na szachownicy.
+Celem aplikacji \emph{Chess3D} jest wyświetlanie trójwymiarowej wizualizacji. Przedstawia ona scenę składającą się z szachownicy oraz pionków szachowych, oświetlanych światłem stożkowym.
+
+Użytkownik aplikacji może zaznaczyć dowolny pionek na planszy, a następnie wskazywać pole, na który dany pionek powinien być przesunięty. Ruchy wykonane przez użytkownika nie muszą być prawidłowymi ruchami szachowymi, tj. ich poprawność pod tym kątem nie jest sprawdzana przez aplikację. Po wyspecyfikowaniu ruchu aplikacja w czasie rzeczywistym wyświetla animację przesunięcia pionka w nowe miejsce.
+
+W zakresie projektu znajduje się również demonstracja kilku klasycznych metod symulacji światła dla obiektów trójwymiarowych, a mianowicie:
+\begin{itemize}
+	\item modele oświetlenia sceny:
+	\begin{itemize}
+		\item model Phonga \cite{phong75},
+		\item model Blinna-Phonga \cite{blinn77},
+	\end{itemize}
+	\item tryby cieniowania trójkątów:
+	\begin{itemize}
+		\item cieniowanie płaskie,
+		\item cieniowanie Gouraud \cite{gouraud71},
+		\item cieniowanie Phonga \cite{phong75}.
+	\end{itemize}
+\end{itemize}
+Użytkownik powinien mieć możliwość wyboru powyższych metod, skutkujący natychmiastową aktualizacją wyglądu sceny.
+
+Dodatkowo, do wyboru przez użytkownika powinny być następujące trzy kamery, zmieniające perspektywę postrzegania sceny:
+\begin{itemize}
+	\item kamera nieruchoma, obejmująca całość szachownicy; usytuowanie tej kamery powinno umożliwiać łatwe wykonanie ruchu, czyli wybranie przez użytkownika pionka i pola,
+	\item kamera nieruchoma, śledząca ruch ostatnio przesuniętego pionka,
+	\item kamera ruchoma, związana z ostatnim poruszanym pionkiem na szachownicy.
+\end{itemize}
+
+Renderowanie sceny powinno odbywać się w trybie \emph{software}, tzn. obliczenia związane z wyświetlaniem obrazu mają używać procesora, zamiast jednostek \hyperref[abbr:gpu]{GPU}. Potok renderowania powinien być zaimplementowany od podstaw oraz wzorować się na istniejącym popularnym schemacie używanym w wielu bibliotekach graficznych 3D, takich, jak m.in. OpenGL, składającym się z następujących kroków:
+\begin{itemize}
+	\item transformacja współrzędnych (współrzędne świata, kamery),
+	\item rzut na płaszczyznę,
+	\item obcinanie wielokątów oraz eliminacja ścian tylnych,
+	\item wypełnianie wielokątów zgodnie z przyjętym modelem oświetlenia.
+\end{itemize}
+
+\newpage
 
 \subsection{Wymagania biznesowe}
-% Punkt obowiązkowy.
-%
-% W niniejszym punkcie należy zawrzeć, wymagania tworzonego systemu/aplikacji, dozwolone formy:
-% diagramy przypadków użycia wraz z opisem, historie użytkownika (user stories) wraz z opisem,
-% pomocniczo: scenariusze użycia.
 
 \subsubsection*{Przypadki użycia}
-%\subsubsection*{User stories}
+
+Przypadki użycia aplikacji przedstawione są na poniższym diagramie UML.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=7cm]{use-case.pdf}
+	\caption{Diagram przypadków użycia}
+\end{figure}
 
 \begin{table}[H]
 	\begin{tabularx}{\textwidth}{|l|X|X|}
@@ -70,41 +110,29 @@ Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wiz
 		& $\bullet$ kamera ruchoma, związana z ostatnio poruszonym pionkiem. & \\
 		\hline
 		Zmiana oświetlenia &
-		Zmiana modelu oświetlenia sceny na model Phonga \cite{phong75} lub model Blinna \cite{blinn77} &
+		Zmiana modelu oświetlenia sceny na model Phonga lub model Blinna. &
 		Aktualizacja wizualizacji uwzględniająca wybrany model oświetlenia. \\
 		\hline
 		Zmiana cieniowania &
 		Zmiana trybu cieniowania sceny na jeden z poniższych: &
 		Aktualizacja wizualizacji uwzględniająca wybrany tryb cieniowania. \\
 		& $\bullet$ cieniowanie stałe, & \\
-		& $\bullet$ cieniowanie Gourauda \cite{gouraud71}, & \\
-		& $\bullet$ cieniowanie Phonga \cite{phong75}. & \\
+		& $\bullet$ cieniowanie Gouraud, & \\
+		& $\bullet$ cieniowanie Phonga. & \\
 		\hline
 		Poruszanie pionkiem &
 		Przesunięcie pionka na nowe pole po wybraniu pionka i pola. &
 		Animacja poruszania się pionka, wyświetlana w czasie rzeczywistym. \\
 		\hline
-		% TODO: coś więcej?
 	\end{tabularx}
 	\caption{Opisy przypadków użycia}
 \end{table}
 
+\newpage
+
 \subsection{Wymagania niefunkcjonalne}
-% Punkt obowiązkowy.
-%
-% Rozdział zawierać powinien listę wymagań niefunkcjonalnych oraz ich opis najlepiej w formie tabeli. W
-% uchwyceniu wymagań funkcjonalnych przydatna jest klasyfikacja wymagań FURPS+.
-% FURPS jest akronimem od:
-% - Functionality – wymaganie funkcjonalne, przedstawione powyżej
-% - Usability – wymagania związane z użytecznością i ergonomią systemu
-% - Reliability – wymaganie związane z niezawodnością i dostępnością systemu
-% - Performance – wymagania związane z wydajnością systemu
-% - Supportability – wymagania związane z utrzymaniem systemu
-% + ma za zadanie przypominać o szczególnych wymaganiach związanych np. z koniecznością użycia
-% konkretnej technologii, wzorców projektowych, metodyki zarządzania projektem, bezpieczeństwem
-% danych, których istnienie zależy od specyfiki branży i systemu
-% Zadaniem prowadzącego jest zdefiniowanie jakie obszary wymagań niefunkcjonalnych poza URPS
-% powinny być wyspecyfikowane.
+
+W trakcie analizy rozpoznane zostały następujące wymagania niefunkcjonalne:
 
 \begin{table}[H]
 	\begin{tabularx}{\textwidth}{|l|X|}
@@ -113,7 +141,7 @@ Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wiz
 		\hline
 		Użyteczność & Aplikacja powinna posiadać dwa tryby działania: okienkowy oraz pełnego ekranu. \\
 		\hline
-		Niezawodność &  \\
+		Niezawodność & Na obrazie generowanym przez aplikację nie powinny być widoczne żadne artefakty lub zniekształcenia spowodowane błędami renderingu. \\
 		\hline
 		Wydajność & Aplikacja powinna być w stanie generować kolejne klatki obrazu w czasie krótszym niż 1 sekunda (płynność większa niż 1 klatka na sekundę). \\
 		\cline{2-2}
@@ -121,51 +149,57 @@ Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wiz
 		\hline
 		Utrzymanie & Wraz z aplikacją zostanie dołączona instrukcja obsługi. \\
 		\cline{2-2}
-		& Aplikacja będzie wspierała wczytywanie modeli pionków szachowych z plików \texttt{.obj}. \\
+		& Aplikacja będzie wspierała wczytywanie modeli pionków szachowych z plików \texttt{.obj} lub innych wspieranych przez narzędzia do modelowania 3D. \\
 		\hline
 	\end{tabularx}
 	\caption{Lista wymagań niefunkcjonalnych dla aplikacji}
 \end{table}
 
 \subsection{Harmonogram projektu}
-% Punkt obowiązkowy.
-%
-% Rozdział powinien zawierać harmonogram projektu obejmujący co najmniej kamienie
-% milowe.
-% Celem tworzenia harmonogramu jest oczywiście zaplanowanie prac nad projektem, co w
-% szczególności pozwala m.in. na identyfikację następstwa zadań w projekcie. Ważnym
-% efektem jest często stwierdzenie, iż np. projekt wymaga szybkiego uruchomienia pierwszych
-% zadań i/lub ich częściowo równoległej realizacji, gdyż bez podjęcia tych działań zakończenie
-% projektu w planowanym terminie będzie trudne bądź niemożliwe. Harmonogram projektu
-% zawarty w tym punkcie musi definiować co najmniej kamienie milowe, aczkolwiek z przyczyn
-% powyżej zalecane jest również wydzielenie zadań o czasie trwania rzędu jednego - trzech
-% tygodni lub dłuższym (stopień szczegółowości zależny od czasu trwania całego projektu).
-% Wśród kamieni milowych należy wyróżnić co najmniej poniższe:
-% - zakończenie analizy kluczowych wymagań odzwierciedlone w punktach 1.1, 1.2 i 1.3
-%   niniejszego  dokumentu.  Wymagania  powinny  być  aprobowane  przez  wszystkich
-%   interesariuszy (tu: wykonawców i osoby oceniające projekt)
-% - zakończenie i uzgodnienie z prowadzącym specyfikacji (rozdział 1)
-% - uzyskanie stabilnej architektury rozwiązania (opisanej w punkcie 1.5 i potwierdzonej np.
-%   wstępną implementacją)
-% - gotowość aplikacji stworzonej w ramach projektu do użycia
-% - zakończenie dokumentacji (rozdział 2 i 3) i naniesienie zmian wynikających z testów w
-%   aplikacji
-% Uwaga: praca nad analizą wymagań nie wyklucza podejmowania równolegle prac nad architekturą,
-% czy też wstępnej implementacji.
-% 
-% Opis powinien mieć postać tabeli z listą zadań i kamieni milowych, ich terminami
-% rozpoczęcia i zakończenia oraz opcjonalnie diagramu Gantta, który przedstawia te
-% informacje oraz zależności pomiędzy zadaniami w formie graficznej.
+
+Harmonogram zadań przedstawiony jest na poniższym diagramie Gantta:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=14cm]{gantt-chart.pdf}
+	\caption{Diagram Gantta przedstawiający planowany harmonogram prac}
+\end{figure}
+Poniżej przedstawione zostały kamienie milowe wchodzące w skład realizacji projektu.
+\begin{enumerate}
+	\item 16 grudnia 2016 -- zakończenie analizy wymagań projektu,
+	\item 18 grudnia 2016 -- uzgodnienie specyfikacji projektu,
+	\item 23 grudnia 2016 -- zakończenie wstępnej implementacji,
+	\item 20 stycznia 2017 -- zakończenie właściwej implementacji,
+	\item 23 stycznia 2017 -- zakończenie prac nad dokumentacją powykonawczą,
+	\item 24 stycznia 2017 -- złożenie projektu wraz z pełną dokumentacją.
+\end{enumerate}
+
+\newpage
 
 \subsection{Architektura rozwiązania}
-% Punkt obowiązkowy.
-% 
-% Rozdział powinien zawierać schemat i opis architektury tworzonego z rozbiciem na poszczególne
-% komponenty wchodzące w jej skład. W przypadku bardziej rozbudowanych systemów architekturę
-% można opisać w formie ogólnej (pierwszy schemat) i w kolejnym kroku uszczegółowić (w kolejnym
-% schemacie(ach)) co zapewni wymaganą przejrzystość rysunków. Należy również zamieścić
-% uzasadnienie wybranej architektury.
 
+Ze względu na spełniane funkcjonalności aplikacja została podzielona na komponenty w sposób zaprezentowany na poniższym diagramie:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{component-chart.pdf}
+	\caption{Diagram komponentów aplikacji}
+\end{figure}
+
+\paragraph{Komponent danych}
+Odpowiada za wczytanie z dysku danych związanych ze sceną, takich, jak: dane modeli wykorzystanych w scenie, położenie i parametry oświetlenia obiektów. Zawiera on również klasy reprezentujące te obiekty, których używa komponent obliczeniowy. Proces wczytywania modeli będzie wspomagany przez bibliotekę \emph{Assimp} \cite{assimp}.
+
+\paragraph{Komponent obliczeniowy}
+Jego rolą jest przetworzenie wczytanych z plików wejściowych danych i dokonanie właściwych obliczeń związanych z wizualizacją, tj. zmianę układów współrzędnych, rzutu na płaszczyznę oraz symulację oświetlenia. Do wykonywania obliczeń wykorzystana zostanie biblioteka \emph{Generic Graphics Toolkit} \cite{ggt}.
+
+\paragraph{Komponent wyświetlania}
+Wykorzystuje obliczenia wykonane przez powyższy komponent do właściwego tworzenia obrazu dwuwymiarowego i wyświetla go na ekranie. Ponadto obsługuje polecenia użytkownika, wydawane za pośrednictwem interfejsu graficznego, i przekazuje informacje o nich do pozostałych komponentów. W tym komponencie wykorzystane będą funkcjonalności biblioteki \emph{Simple DirectMedia Layer 2.0} \cite{sdl}.
+
+W celu uzyskania jak największej wydajności, aplikacja tworzona będzie w języku C++.
+
+\newpage
+
+\begin{comment}
 \section{Dokumentacja końcowa (powykonawcza)}
 
 \subsection{Wymagania systemowe}
@@ -248,18 +282,30 @@ Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wiz
 % W przypadku projektów półsemestralnych np. realizowanych w ramach projektu zespołowego.
 % Rozdział powinien zawierać scenariusze testów akceptacyjnych nawiązujących do wymagań
 % funkcjonalnych i niefunkcjonalnych systemu i wyniki ich przeprowadzenia.
+\end{comment}
 
 \section{Lista użytych skrótów}
+
+\label{abbr:gpu}
+\paragraph{GPU} Graphics Processing Unit
 
 \renewcommand*{\refname}{\vspace*{-2em}}
 \section{Bibliografia}
 \begin{thebibliography}{99}
+
+\bibitem{assimp}
+	Assimp -- Open Asset Import Library,
+	\url{http://www.assimp.org/}
 
 \bibitem{blinn77}
 	James F. Blinn,
 	\emph{Models of Light Reflection for Computer Synthesized Pictures},
 	Proceedings of the 4th Annual Conference on Computer Graphics and Interactive Techniques,
 	pp. 192-198.
+
+\bibitem{ggt}
+	Generic Graphics Toolkit,
+	\url{http://ggt.sourceforge.net/}
 	
 \bibitem{gouraud71}
 	Henri Gouraud,
@@ -274,5 +320,9 @@ Tworzona aplikacja służy do wyświetlania na ekranie w czasie rzeczywistym wiz
 	Communications of the ACM,
 	June 1975, Volume 18, Number 6,
 	pp. 311-317.
+
+\bibitem{sdl}
+	Simple DirectMedia Layer,
+	\url{https://www.libsdl.org/}
 \end{thebibliography}
 \end{document}
