@@ -1,22 +1,24 @@
 ﻿#pragma once
 #include <Assimp/scene.h>
 #include <vector>
-#include "vector3.h"
+#include "vertex.h"
 
 class Face
 {
 public:
 	explicit Face(const aiFace& face);
-private:
 	std::vector<unsigned int> indices;
 };
 
 class Mesh
 {
 public:
-	Mesh() { }
+	Mesh();
 	explicit Mesh(const aiMesh& mesh);
-private:
-	std::vector<Vector3D> vertices;
+
+	std::vector<Vertex> vertices;
 	std::vector<Face> faces;
+	Eigen::Matrix4f GetWorldMatrix() const;
+private:
+	Eigen::Matrix4f world_matrix;
 };

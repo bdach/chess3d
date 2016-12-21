@@ -1,15 +1,25 @@
 ﻿#include "mesh.h"
 
-Mesh::Mesh(const aiMesh& mesh)
+Mesh::Mesh()
 {
-	for (auto i = 0; i < mesh.mNumVertices; ++i)
+	world_matrix = Eigen::Matrix4f::Identity();
+}
+
+Mesh::Mesh(const aiMesh& mesh) : Mesh()
+{
+	for (unsigned int i = 0; i < mesh.mNumVertices; ++i)
 	{
-		vertices.push_back(Vector3D(mesh.mVertices[i]));
+		vertices.push_back(Vertex(mesh.mVertices[i]));
 	}
-	for (auto i = 0; i < mesh.mNumFaces; ++i)
+	for (unsigned int i = 0; i < mesh.mNumFaces; ++i)
 	{
 		faces.push_back(Face(mesh.mFaces[i]));
 	}
+}
+
+Eigen::Matrix4f Mesh::GetWorldMatrix() const
+{
+	return world_matrix;
 }
 
 Face::Face(const aiFace& face)

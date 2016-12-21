@@ -2,21 +2,26 @@
 #include <Assimp/Importer.hpp>
 #include <Assimp/scene.h>
 #include <Assimp/postprocess.h>
-#include "mesh.h"
 #include "window.h"
+#include "scene.h"
 
-Mesh LoadObject(const std::string& path);
+#ifdef main
+#undef main
+#endif
+
+Scene LoadObject(const std::string& path);
 
 int main(int argc, char **argv)
 {
 	const std::string path = "../Chess3D/Models/wt_teapot.obj";
 	Window window("SDL Test");
-	auto mesh = LoadObject(path);
-	window.Show();
+	auto scene = LoadObject(path);
+	scene.cameras.push_back(Camera(Eigen::Vector3f(0, 2, 2)));
+	window.Show(scene);
 	return 0;
 }
 
-Mesh LoadObject(const std::string& path)
+Scene LoadObject(const std::string& path)
 {
 	Mesh mesh;
 	Assimp::Importer importer;
@@ -29,9 +34,5 @@ Mesh LoadObject(const std::string& path)
 	{
 		std::cerr << "[Error] Loading model failed" << std::endl;
 	}
-	if (scene->mNumMeshes >= 1)
-	{
-		mesh = Mesh(*scene->mMeshes[0]);
-	}
-	return mesh;
+	return Scene(*scene);
 }

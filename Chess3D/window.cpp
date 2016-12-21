@@ -18,17 +18,62 @@ Window::Window(const std::string& _title)
 		throw std::exception("Window could not be created");
 	}
 	surface = SDL_GetWindowSurface(window);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == nullptr)
+	{
+		throw std::exception("Could not create renderer");
+	}
 }
 
-void Window::Show()
+void Window::Show(const Scene& scene) const
 {
-	SDL_FillRect(surface, nullptr, SDL_MapRGB(surface->format, 0xff, 0xff, 0xff));
+	SDL_RenderClear(renderer);
 	SDL_UpdateWindowSurface(window);
-	SDL_Delay(5000);
+	auto quit = false;
+	SDL_Event event;
+	RenderScene(scene);
+	while (!quit) {
+		while (SDL_PollEvent(&event) != 0)
+		{
+			if (event.type == SDL_QUIT)
+			{
+				quit = true;
+			}
+		}
+	}
+}
+
+void Window::RenderScene(const Scene& scene) const
+{
+	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
+
+	for (auto mesh : scene.meshes)
+	{
+		std::vector<Eigen::Vector3f> processed;
+		for (auto vertex : mesh.vertices)
+		{
+			Eigen::Vector4f coords = scene.cameras[0].GetProjectionMatrix() * scene.cameras[0].GetViewMatrix() * mesh.GetWorldMatrix() * vertex.vector;
+			processed.push_back(Eigen::Vector3f((coords.x() + 1) * SCREEN_WIDTH / 2, SCREEN_HEIGHT - (coords.y() + 1) * SCREEN_HEIGHT / 2, coords.z()));
+		}
+		for (auto face : mesh.faces)
+		{
+			unsigned int count = face.indices.size();
+			for (unsigned int i = 0; i < count; ++i)
+			{
+				SDL_RenderDrawLine(renderer, processed[face.indices[i]].x(), processed[face.indices[i]].y(),
+					processed[face.indices[(i + 1) % count]].x(), processed[face.indices[(i + 1) % count]].y());
+			}
+		}
+	}
+
+	SDL_RenderPresent(renderer);
 }
 
 Window::~Window()
 {
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	SDL_DestroyRenderer(renderer);
 }
