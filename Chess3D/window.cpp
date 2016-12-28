@@ -1,5 +1,6 @@
 ﻿#include <exception>
 #include "window.h"
+#include "v_shader.h"
 
 Window::Window(const std::string& _title)
 {
@@ -51,19 +52,17 @@ void Window::RenderScene(const Scene& scene) const
 
 	for (auto mesh : scene.meshes)
 	{
-		std::vector<Eigen::Vector3f> processed;
-		for (auto vertex : mesh.vertices)
-		{
-			Eigen::Vector4f coords = scene.cameras[0].GetProjectionMatrix() * scene.cameras[0].GetViewMatrix() * mesh.GetWorldMatrix() * vertex.vector;
-			processed.push_back(Eigen::Vector3f((coords.x() + 1) * SCREEN_WIDTH / 2, SCREEN_HEIGHT - (coords.y() + 1) * SCREEN_HEIGHT / 2, coords.z()));
-		}
+		std::vector<ShadedVertex> processed;
+		auto back_inserter = std::back_inserter(processed);
+		VertexShader::TransformCoords(mesh, scene.cameras[0], back_inserter);
 		for (auto face : mesh.faces)
 		{
 			unsigned int count = face.indices.size();
 			for (unsigned int i = 0; i < count; ++i)
 			{
-				SDL_RenderDrawLine(renderer, processed[face.indices[i]].x(), processed[face.indices[i]].y(),
-					processed[face.indices[(i + 1) % count]].x(), processed[face.indices[(i + 1) % count]].y());
+				SDL_RenderDrawLine(renderer,
+					ScreenX(processed[face.indices[i]]), ScreenY(processed[face.indices[i]]),
+					ScreenX(processed[face.indices[(i + 1) % count]]), ScreenY(processed[face.indices[(i + 1) % count]]));
 			}
 		}
 	}
@@ -76,4 +75,14 @@ Window::~Window()
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	SDL_DestroyRenderer(renderer);
+}
+
+int Window::ScreenX(const ShadedVertex& vertex) const
+{
+	return (vertex.coords.x() + 1) / 2 * SCREEN_WIDTH;
+}
+
+int Window::ScreenY(const ShadedVertex& vertex) const
+{
+	return (vertex.coords.y() - 1) / 2 * -SCREEN_HEIGHT;
 }

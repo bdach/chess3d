@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include <string>
 #include <SDL.h>
 #include "scene.h"
+#include "v_shader.h"
 
 class Window
 {
@@ -16,6 +16,9 @@ public:
 private:
 	const int SCREEN_WIDTH = 800;
 	const int SCREEN_HEIGHT = 600;
+
+	int ScreenX(const ShadedVertex& coords) const;
+	int ScreenY(const ShadedVertex& coords) const;
 
 	SDL_Window* window;
 	SDL_Surface* surface;
