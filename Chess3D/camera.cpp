@@ -22,6 +22,8 @@ Camera::Camera(Eigen::Vector3f _eye) : Camera(_eye, 3.0f / 4.0f, M_PI / 2, 0.1f,
 
 Eigen::Matrix4f Camera::LookAt(Eigen::Vector3f _target)
 {
+	look_at = _target;
+
 	Eigen::Vector3f z_axis = eye - _target;
 	z_axis.normalize();
 	Eigen::Vector3f x_axis = up.cross(z_axis);
@@ -29,21 +31,15 @@ Eigen::Matrix4f Camera::LookAt(Eigen::Vector3f _target)
 	Eigen::Vector3f y_axis = z_axis.cross(x_axis);
 	y_axis.normalize();
 
-	Eigen::Matrix4f orientation;
-	orientation << 
-		x_axis.x(),	y_axis.x(),	z_axis.x(),	0,
-		x_axis.y(),	y_axis.y(),	z_axis.y(),	0,
-		x_axis.z(),	y_axis.z(),	z_axis.z(),	0,
+	Eigen::Matrix4f inverse;
+	inverse <<
+		x_axis.x(),	y_axis.x(),	z_axis.x(),	eye.x(),
+		x_axis.y(),	y_axis.y(),	z_axis.y(), eye.y(),
+		x_axis.z(),	y_axis.z(),	z_axis.z(), eye.z(),
 		0,			0,			0,			1;
 
-	Eigen::Matrix4f translation;
-	translation <<
-		1,			0,			0,			0,
-		0,			1,			0,			0,
-		0,			0,			1,			0,
-		-eye.x(),	-eye.y(),	-eye.z(),	1;
-
-	return view_matrix = orientation * translation;
+	view_matrix = inverse.inverse();
+	return view_matrix;
 }
 
 Eigen::Matrix4f Camera::GetProjectionMatrix() const
