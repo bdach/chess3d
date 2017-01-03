@@ -6,8 +6,8 @@ class Vertex
 {
 public:
 	Vertex();
-	Vertex(float _x, float _y, float _z);
-	explicit Vertex(const aiVector3D& _vector);
+	explicit Vertex(const aiVector3D& _vector, const aiVector3D& _normal);
 
 	Eigen::Vector4f vector;
+	Eigen::Vector3f normal;
 };

@@ -9,7 +9,7 @@ Mesh::Mesh(const aiMesh& mesh) : Mesh()
 {
 	for (unsigned int i = 0; i < mesh.mNumVertices; ++i)
 	{
-		vertices.push_back(Vertex(mesh.mVertices[i]));
+		vertices.push_back(Vertex(mesh.mVertices[i], mesh.mNormals[i]));
 	}
 	for (unsigned int i = 0; i < mesh.mNumFaces; ++i)
 	{
