@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 	const std::string path = "../Chess3D/Models/wt_teapot.obj";
 	Window window("SDL Test");
 	auto scene = LoadObject(path);
-	Camera camera(Eigen::Vector3f(-2, 2, 2));
+	Camera camera(Eigen::Vector3f(-0.8f, 0.8f, 1.5f));
 	camera.LookAt(Eigen::Vector3f(0, 0.5f, 0));
 	scene.cameras.push_back(camera);
 	window.Show(scene);
