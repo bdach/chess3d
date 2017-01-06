@@ -16,7 +16,7 @@ Camera::Camera(Eigen::Vector3f _eye, float _aspect_ratio, float _fov, float _nea
 	LookAt(Eigen::Vector3f(0, 0, 0));
 }
 
-Camera::Camera(Eigen::Vector3f _eye) : Camera(_eye, 3.0f / 4.0f, M_PI / 2, 0.1f, 2.0f)
+Camera::Camera(Eigen::Vector3f _eye) : Camera(_eye, 3.0f / 4.0f, M_PI / 2, 1.0f, 5.0f)
 {
 }
 

@@ -25,7 +25,6 @@ int main(int argc, char **argv)
 
 Scene LoadObject(const std::string& path)
 {
-	Mesh mesh;
 	Assimp::Importer importer;
 	auto scene = importer.ReadFile(path,
 		aiProcess_CalcTangentSpace |

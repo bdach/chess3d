@@ -2,40 +2,48 @@
 #include <SDL_pixels.h>
 #include "f_shader.h"
 #include "v_shader.h"
+#include <ctime>
+#include <Eigen/Dense>
 
 #define DEBUG
 
-FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data)
+FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data), depth_buffer(_width * _height)
 {
+	srand(time(nullptr));
+	r = g = b = 0xff;
 	width = _width;
 	height = _height;
+
+	for (auto i = 0; i < _width * _height; ++i)
+	{
+		depth_buffer[i] = INT_MAX;
+	}
 }
 
 void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
 {
-	std::vector<Eigen::Vector2i> face_vertices;
+	std::vector<Eigen::Vector3i> screen;
 	for (auto index : face.indices)
 	{
-		face_vertices.push_back(TransformCoords(vertices[index]));
+		screen.push_back(TransformCoords(vertices[index]));
 	}
-#ifdef DEBUG
-	assert(face.indices.size() == 3);
-#endif
-	std::sort(face_vertices.begin(), face_vertices.end(), [](const Eigen::Vector2i& v1, const Eigen::Vector2i& v2) -> bool { return v1.y() < v2.y(); });
+	std::sort(screen.begin(), screen.end(), [](const Eigen::Vector3i& v1, const Eigen::Vector3i& v2) -> bool { return v1.y() < v2.y(); });
+	Eigen::Vector3f z_coords(screen[0].z(), screen[1].z(), screen[2].z());
 
-	FillBottomFlatTriangle(face_vertices[0], face_vertices[1], face_vertices[2]);
-	FillTopFlatTriangle(face_vertices[0], face_vertices[1], face_vertices[2]);
+	r = rand() % 0x100;
+	g = rand() % 0x100;
+	b = rand() % 0x100;
 
-	//FillBottomFlatTriangle(Eigen::Vector2i(50, 10), Eigen::Vector2i(300, 200), Eigen::Vector2i(500, 500));
-	//FillTopFlatTriangle(Eigen::Vector2i(50, 10), Eigen::Vector2i(300, 200), Eigen::Vector2i(500, 500));
+	FillBottomFlatTriangle(screen[0], screen[1], screen[2], z_coords);
+	FillTopFlatTriangle(screen[0], screen[1], screen[2], z_coords);
 }
 
-Eigen::Vector2i FragmentShader::TransformCoords(const ShadedVertex& vertex) const
+Eigen::Vector3i FragmentShader::TransformCoords(const ShadedVertex& vertex) const
 {
-	return Eigen::Vector2i((vertex.x() + 1) / 2 * width, (vertex.y() - 1) / 2 * -height);
+	return Eigen::Vector3i((vertex.x() + 1) / 2 * width, (vertex.y() - 1) / 2 * -height, (vertex.z() + 1) / 2 * INT_MAX);
 }
 
-void FragmentShader::FillBottomFlatTriangle(Eigen::Vector2i v1, Eigen::Vector2i v2, Eigen::Vector2i v3) const
+void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
 	int y_max = v2.y();
 	float m1 = static_cast<float>(v2.x() - v1.x()) / (v2.y() - v1.y());
@@ -48,9 +56,14 @@ void FragmentShader::FillBottomFlatTriangle(Eigen::Vector2i v1, Eigen::Vector2i 
 	{
 		for (int x = x1; x <= x2; ++x)
 		{
-			int offset = 4 * (width * y + x);
-			pixel_data[offset + 0] = pixel_data[offset + 1] = pixel_data[offset + 2] = 0xff;
-			pixel_data[offset + 3] = SDL_ALPHA_OPAQUE;
+			int offset = width * y + x;
+			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
+			if (z > depth_buffer[offset]) continue;
+			depth_buffer[offset] = z;
+			pixel_data[4 * offset + 0] = r;
+			pixel_data[4 * offset + 1] = g;
+			pixel_data[4 * offset + 2] = b;
+			pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
 		}
 		x1 += m1;
 		x2 += m2;
@@ -58,10 +71,9 @@ void FragmentShader::FillBottomFlatTriangle(Eigen::Vector2i v1, Eigen::Vector2i 
 }
 
 
-void FragmentShader::FillTopFlatTriangle(Eigen::Vector2i v1, Eigen::Vector2i v2, Eigen::Vector2i v3) const
+void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
 	int y_min = v2.y();
-	//if (v1.x() > v2.x()) std::swap(v1, v2);
 	float m1 = static_cast<float>(v1.x() - v3.x()) / (v1.y() - v3.y());
 	float m2 = static_cast<float>(v2.x() - v3.x()) / (v2.y() - v3.y());
 	if (m1 < m2) std::swap(m1, m2);
@@ -72,11 +84,28 @@ void FragmentShader::FillTopFlatTriangle(Eigen::Vector2i v1, Eigen::Vector2i v2,
 	{
 		for (int x = x1; x <= x2; ++x)
 		{
-			int offset = 4 * (width * y + x);
-			pixel_data[offset + 0] = pixel_data[offset + 1] = pixel_data[offset + 2] = 0xff;
-			pixel_data[offset + 3] = SDL_ALPHA_OPAQUE;
+			int offset = width * y + x;
+			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
+			if (z > depth_buffer[offset]) continue;
+			depth_buffer[offset] = z;
+			pixel_data[4 * offset + 0] = r;
+			pixel_data[4 * offset + 1] = g;
+			pixel_data[4 * offset + 2] = b;
+			pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
 		}
 		x1 -= m1;
 		x2 -= m2;
-	}
+	}      
+}
+
+Eigen::RowVector3f FragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)
+{
+	Eigen::Matrix3f A;
+	A <<
+		v1.x(), v2.x(), v3.x(),
+		v1.y(), v2.y(), v3.y(),
+		1, 1, 1;
+	Eigen::Vector3f b(x, y, 1);
+	Eigen::Vector3f result = A.colPivHouseholderQr().solve(b);
+	return result.transpose();
 }

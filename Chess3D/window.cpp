@@ -1,6 +1,7 @@
 ﻿#include <exception>
 #include "window.h"
 #include "v_shader.h"
+#include <iostream>
 
 #define DRAW_BITMAP
 //#define VERTICES_ONLY
@@ -99,7 +100,6 @@ void Window::RenderScene(const Scene& scene)
 		{
 			fragment_shader.Paint(face, processed);
 		}
-		//fragment_shader.Paint(Face(aiFace()), processed);
 #endif
 	}
 	SDL_UpdateTexture(frame_buffer, nullptr, &pixel_data[0], SCREEN_WIDTH * 4);
