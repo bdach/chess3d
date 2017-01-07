@@ -54,8 +54,9 @@ void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i 
 
 	for (int y = v1.y(); y <= y_max; ++y)
 	{
-		for (int x = x1; x <= x2; ++x)
+		for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
 		{
+			if (y < 0 || y >= height) break;
 			int offset = width * y + x;
 			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
 			if (z > depth_buffer[offset]) continue;
@@ -82,8 +83,9 @@ void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2,
 
 	for (int y = v3.y(); y > y_min; --y)
 	{
-		for (int x = x1; x <= x2; ++x)
+		for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
 		{
+			if (y < 0 || y >= height) break;
 			int offset = width * y + x;
 			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
 			if (z > depth_buffer[offset]) continue;
