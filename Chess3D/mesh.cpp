@@ -3,6 +3,9 @@
 Mesh::Mesh()
 {
 	world_matrix = Eigen::Matrix4f::Identity();
+	r = 153;
+	g = 29;
+	b = 0;
 }
 
 Mesh::Mesh(const aiMesh& mesh) : Mesh()

@@ -18,6 +18,8 @@ public:
 
 	std::vector<Vertex> vertices;
 	std::vector<Face> faces;
+	unsigned char r, g, b;
+
 	Eigen::Matrix4f GetWorldMatrix() const;
 private:
 	Eigen::Matrix4f world_matrix;

@@ -13,7 +13,7 @@ Scene LoadObject(const std::string& path);
 
 int main(int argc, char **argv)
 {
-	const std::string path = "../Chess3D/Models/sphere.obj";
+	const std::string path = "../Chess3D/Models/wt_teapot.obj";
 	Window window("SDL Test");
 	auto scene = LoadObject(path);
 	Camera camera(Eigen::Vector3f(-0.8f, 0.8f, 1.5f));

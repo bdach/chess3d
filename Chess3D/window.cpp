@@ -1,12 +1,8 @@
 ﻿#include <exception>
 #include "window.h"
 #include "v_shader.h"
-#include <iostream>
 
-#define DRAW_BITMAP
-//#define VERTICES_ONLY
-
-Window::Window(const std::string& _title) : pixel_data(SCREEN_WIDTH * SCREEN_HEIGHT * 4, 0), fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, this->pixel_data)
+Window::Window(const std::string& _title) : pixel_data(SCREEN_WIDTH * SCREEN_HEIGHT * 4, 0)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -54,58 +50,20 @@ void Window::Show(const Scene& scene)
 
 void Window::RenderScene(const Scene& scene)
 {
-#ifndef DRAW_BITMAP
-	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
-	SDL_RenderClear(renderer);
-	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
-
-	for (auto mesh : scene.meshes)
-	{
-		std::vector<ShadedVertex> processed;
-		auto back_inserter = std::back_inserter(processed);
-		VertexShader::TransformCoords(mesh, scene.cameras[0], back_inserter);
-		for (auto face : mesh.faces)
-		{
-			unsigned int count = face.indices.size();
-			for (unsigned int i = 0; i < count; ++i)
-			{
-				SDL_RenderDrawLine(renderer,
-					ScreenX(processed[face.indices[i]]), ScreenY(processed[face.indices[i]]),
-					ScreenX(processed[face.indices[(i + 1) % count]]), ScreenY(processed[face.indices[(i + 1) % count]]));
-			}
-		}
-		SDL_RenderPresent(renderer);
-	}
-#endif
-
-#ifdef DRAW_BITMAP
 	SDL_RenderPresent(renderer);
 
+	FragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data);
+
 	for (auto mesh : scene.meshes)
 	{
 		std::vector<ShadedVertex> processed;
 		auto back_inserter = std::back_inserter(processed);
 		VertexShader::TransformCoords(mesh, scene.cameras[0], back_inserter);
-#ifdef VERTICES_ONLY
-		for (auto vertex : processed)
-		{
-			if (!InBound(vertex.x(), 1) || !InBound(vertex.y(), 1)) continue;
-			auto offset = SCREEN_WIDTH * 4 * ScreenY(vertex) + 4 * ScreenX(vertex);
-			pixel_data[offset + 0] = pixel_data[offset + 1] = pixel_data[offset + 2] = 0xff;
-			pixel_data[offset + 3] = SDL_ALPHA_OPAQUE;
-		}
-#endif
-#ifndef VERTICES_ONLY
-		for (auto face : mesh.faces)
-		{
-			fragment_shader.Paint(face, processed);
-		}
-#endif
+		fragment_shader.Paint(mesh, processed);
 	}
 	SDL_UpdateTexture(frame_buffer, nullptr, &pixel_data[0], SCREEN_WIDTH * 4);
 	SDL_RenderCopy(renderer, frame_buffer, nullptr, nullptr);
 	SDL_RenderPresent(renderer);
-#endif
 }
 
 Window::~Window()

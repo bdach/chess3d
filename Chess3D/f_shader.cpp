@@ -9,7 +9,6 @@
 
 FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data), depth_buffer(_width * _height)
 {
-	srand(time(nullptr));
 	r = g = b = 0xff;
 	width = _width;
 	height = _height;
@@ -17,6 +16,17 @@ FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned cha
 	for (auto i = 0; i < _width * _height; ++i)
 	{
 		depth_buffer[i] = INT_MAX - 1;
+	}
+}
+
+void FragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+{
+	r = mesh.r;
+	g = mesh.g;
+	b = mesh.b;
+	for (auto face : mesh.faces)
+	{
+		Paint(face, vertices);
 	}
 }
 
@@ -29,10 +39,6 @@ void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& ve
 	}
 	std::sort(screen.begin(), screen.end(), [](const Eigen::Vector3i& v1, const Eigen::Vector3i& v2) -> bool { return v1.y() < v2.y(); });
 	Eigen::Vector3f z_coords(screen[0].z(), screen[1].z(), screen[2].z());
-
-	r = rand() % 0x100;
-	g = rand() % 0x100;
-	b = rand() % 0x100;
 
 	FillBottomFlatTriangle(screen[0], screen[1], screen[2], z_coords);
 	FillTopFlatTriangle(screen[0], screen[1], screen[2], z_coords);
@@ -55,23 +61,11 @@ void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i 
 
 	for (int y = v1.y(); y <= y_max; ++y)
 	{
-		for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
-		{
-			if (y < 0 || y >= height) break;
-			int offset = width * y + x;
-			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
-			if (z >= depth_buffer[offset]) continue;
-			depth_buffer[offset] = z;
-			pixel_data[4 * offset + 0] = r;
-			pixel_data[4 * offset + 1] = g;
-			pixel_data[4 * offset + 2] = b;
-			pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
-		}
+		DrawScanline(v1, v2, v3, z_coords, x1, x2, y);
 		x1 += m1;
 		x2 += m2;
 	}
 }
-
 
 void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
@@ -84,21 +78,26 @@ void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2,
 
 	for (int y = v3.y(); y > y_min; --y)
 	{
-		for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
-		{
-			if (y < 0 || y >= height) break;
-			int offset = width * y + x;
-			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
-			if (z >= depth_buffer[offset]) continue;
-			depth_buffer[offset] = z;
-			pixel_data[4 * offset + 0] = r;
-			pixel_data[4 * offset + 1] = g;
-			pixel_data[4 * offset + 2] = b;
-			pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
-		}
+		DrawScanline(v1, v2, v3, z_coords, x1, x2, y);
 		x1 -= m1;
 		x2 -= m2;
 	}      
+}
+
+void FragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
+{
+	for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
+	{
+		if (y < 0 || y >= height) break;
+		int offset = width * y + x;
+		int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
+		if (z >= depth_buffer[offset]) continue;
+		depth_buffer[offset] = z;
+		pixel_data[4 * offset + 0] = r;
+		pixel_data[4 * offset + 1] = g;
+		pixel_data[4 * offset + 2] = b;
+		pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
+	}
 }
 
 Eigen::RowVector3f FragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)

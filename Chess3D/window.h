@@ -23,8 +23,6 @@ private:
 	SDL_Texture* frame_buffer;
 	std::vector<unsigned char> pixel_data;
 	
-	FragmentShader fragment_shader;
-
 	int ScreenX(const ShadedVertex& coords) const;
 	int ScreenY(const ShadedVertex& coords) const;
 	static bool InBound(const int coord, const int max);
