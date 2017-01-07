@@ -16,7 +16,7 @@ FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned cha
 
 	for (auto i = 0; i < _width * _height; ++i)
 	{
-		depth_buffer[i] = INT_MAX;
+		depth_buffer[i] = INT_MAX - 1;
 	}
 }
 
@@ -40,7 +40,8 @@ void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& ve
 
 Eigen::Vector3i FragmentShader::TransformCoords(const ShadedVertex& vertex) const
 {
-	return Eigen::Vector3i((vertex.x() + 1) / 2 * width, (vertex.y() - 1) / 2 * -height, (vertex.z() + 1) / 2 * INT_MAX);
+	int z = (vertex.z() >= -1 && vertex.z() <= 1) ? (vertex.z() + 1) / 2 * INT_MAX - 1 : INT_MAX;
+	return Eigen::Vector3i((vertex.x() + 1) / 2 * width, (vertex.y() - 1) / 2 * -height, z);
 }
 
 void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
@@ -59,7 +60,7 @@ void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i 
 			if (y < 0 || y >= height) break;
 			int offset = width * y + x;
 			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
-			if (z > depth_buffer[offset]) continue;
+			if (z >= depth_buffer[offset]) continue;
 			depth_buffer[offset] = z;
 			pixel_data[4 * offset + 0] = r;
 			pixel_data[4 * offset + 1] = g;
@@ -88,7 +89,7 @@ void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2,
 			if (y < 0 || y >= height) break;
 			int offset = width * y + x;
 			int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
-			if (z > depth_buffer[offset]) continue;
+			if (z >= depth_buffer[offset]) continue;
 			depth_buffer[offset] = z;
 			pixel_data[4 * offset + 0] = r;
 			pixel_data[4 * offset + 1] = g;
