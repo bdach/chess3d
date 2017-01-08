@@ -124,9 +124,7 @@
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Models\wt_teapot.obj">
-      <FileType>Text</FileType>
-    </None>
+    <None Include="Models\chess.dae" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

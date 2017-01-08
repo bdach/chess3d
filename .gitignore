@@ -410,3 +410,9 @@ __pycache__/
 /Documentation/*.log
 /Documentation/*.out
 /Documentation/documentation.pdf
+/Chess3D/Models/chess.ply
+/Chess3D/Models/chess.mtl
+/Chess3D/Models/chess.fbx
+/Chess3D/Models/chess.blend1
+/Chess3D/Models/chess.blend
+/Chess3D/Models/chess.3ds

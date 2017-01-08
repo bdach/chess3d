@@ -6,7 +6,7 @@
 Camera::Camera(Eigen::Vector3f _eye, float _aspect_ratio, float _fov, float _near, float _far)
 {
 	eye = _eye;
-	up = Eigen::Vector3f(0, 1, 0);
+	up = Eigen::Vector3f(0, 0, 1);
 	aspect_ratio = _aspect_ratio;
 	fov = _fov;
 	near = _near;
@@ -16,8 +16,21 @@ Camera::Camera(Eigen::Vector3f _eye, float _aspect_ratio, float _fov, float _nea
 	LookAt(Eigen::Vector3f(0, 0, 0));
 }
 
-Camera::Camera(Eigen::Vector3f _eye) : Camera(_eye, 3.0f / 4.0f, M_PI / 2, 1.0f, 5.0f)
+Camera::Camera(Eigen::Vector3f _eye) : Camera(_eye, 3.0f / 4.0f, M_PI / 3, 0.1f, 100)
 {
+}
+
+Camera::Camera(const aiCamera& camera)
+{
+	eye = Eigen::Vector3f(camera.mPosition.x, camera.mPosition.y, camera.mPosition.z);
+	up = Eigen::Vector3f(camera.mUp.x, camera.mUp.y, camera.mUp.z);
+	aspect_ratio = 0.75f;
+	fov = camera.mHorizontalFOV;
+	near = camera.mClipPlaneNear;
+	far = camera.mClipPlaneFar;
+
+	projection_matrix = GetProjectionMatrix();
+	LookAt(Eigen::Vector3f(camera.mLookAt.x, camera.mLookAt.y, camera.mLookAt.z));
 }
 
 Eigen::Matrix4f Camera::LookAt(Eigen::Vector3f _target)

@@ -8,7 +8,7 @@ Mesh::Mesh()
 	b = 0;
 }
 
-Mesh::Mesh(const aiMesh& mesh) : Mesh()
+Mesh::Mesh(const aiMesh& mesh, const aiMaterial& material) : Mesh()
 {
 	for (unsigned int i = 0; i < mesh.mNumVertices; ++i)
 	{
@@ -17,6 +17,13 @@ Mesh::Mesh(const aiMesh& mesh) : Mesh()
 	for (unsigned int i = 0; i < mesh.mNumFaces; ++i)
 	{
 		faces.push_back(Face(mesh.mFaces[i]));
+	}
+	aiColor4D color;
+	if (AI_SUCCESS == aiGetMaterialColor(&material, AI_MATKEY_COLOR_DIFFUSE, &color))
+	{
+		r = color.r * 255;
+		g = color.g * 255;
+		b = color.b * 255;
 	}
 }
 
