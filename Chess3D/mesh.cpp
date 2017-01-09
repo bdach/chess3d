@@ -3,9 +3,7 @@
 Mesh::Mesh()
 {
 	world_matrix = Eigen::Matrix4f::Identity();
-	r = 153;
-	g = 29;
-	b = 0;
+	color = Eigen::Vector3f();
 }
 
 Mesh::Mesh(const aiMesh& mesh, const aiMaterial& material) : Mesh()
@@ -21,9 +19,7 @@ Mesh::Mesh(const aiMesh& mesh, const aiMaterial& material) : Mesh()
 	aiColor4D color;
 	if (AI_SUCCESS == aiGetMaterialColor(&material, AI_MATKEY_COLOR_DIFFUSE, &color))
 	{
-		r = color.r * 255;
-		g = color.g * 255;
-		b = color.b * 255;
+		this->color = Eigen::Vector3f(color.r, color.g, color.b);
 	}
 }
 

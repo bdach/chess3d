@@ -1,23 +1,25 @@
 #include "v_shader.h"
 
-ShadedVertex::ShadedVertex(Eigen::Vector4f _coords)
+ShadedVertex::ShadedVertex(Eigen::Vector4f original, Eigen::Vector4f screen, Eigen::Vector3f normal)
 {
-	coords = _coords;
+	screen_coords = screen;
+	original_coords = Eigen::Vector3f(original.x(), original.y(), original.z());
+	this->normal = normal;
 }
 
-float ShadedVertex::x() const
+float ShadedVertex::ScreenX() const
 {
-	return coords.x();
+	return screen_coords.x();
 }
 
-float ShadedVertex::y() const
+float ShadedVertex::ScreenY() const
 {
-	return coords.y();
+	return screen_coords.y();
 }
 
-float ShadedVertex::z() const
+float ShadedVertex::ScreenZ() const
 {
-	return coords.z();
+	return screen_coords.z();
 }
 
 void VertexShader::TransformCoords(const Mesh& mesh, const Camera& camera, std::back_insert_iterator<std::vector<ShadedVertex>>& iterator)
@@ -27,6 +29,6 @@ void VertexShader::TransformCoords(const Mesh& mesh, const Camera& camera, std::
 	{
 		Eigen::Vector4f coords = matrix * it->vector;
 		coords /= coords.w();
-		iterator = ShadedVertex(coords);
+		iterator = ShadedVertex(it->vector, coords, it->normal);
 	}
 }

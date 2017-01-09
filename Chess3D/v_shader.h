@@ -7,12 +7,14 @@ class ShadedVertex
 {
 public:
 	ShadedVertex() {}
-	explicit ShadedVertex(Eigen::Vector4f coords);
-	float x() const;
-	float y() const;
-	float z() const;
+	ShadedVertex(Eigen::Vector4f original, Eigen::Vector4f screen, Eigen::Vector3f normal);
+	float ScreenX() const;
+	float ScreenY() const;
+	float ScreenZ() const;
+	Eigen::Vector3f original_coords;
+	Eigen::Vector3f normal;
 private:
-	Eigen::Vector4f coords;
+	Eigen::Vector4f screen_coords;
 };
 
 class VertexShader

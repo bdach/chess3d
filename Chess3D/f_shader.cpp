@@ -21,9 +21,9 @@ FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned cha
 
 void FragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
-	r = mesh.r;
-	g = mesh.g;
-	b = mesh.b;
+	r = mesh.color.x() * 255;
+	g = mesh.color.y() * 255;
+	b = mesh.color.z() * 255;
 	for (auto face : mesh.faces)
 	{
 		Paint(face, vertices);
@@ -46,8 +46,8 @@ void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& ve
 
 Eigen::Vector3i FragmentShader::TransformCoords(const ShadedVertex& vertex) const
 {
-	int z = (vertex.z() >= -1 && vertex.z() <= 1) ? (vertex.z() + 1) / 2 * INT_MAX - 1 : INT_MAX;
-	return Eigen::Vector3i((vertex.x() + 1) / 2 * width, (vertex.y() - 1) / 2 * -height, z);
+	int z = (vertex.ScreenZ() >= -1 && vertex.ScreenZ() <= 1) ? (vertex.ScreenZ() + 1) / 2 * INT_MAX - 1 : INT_MAX;
+	return Eigen::Vector3i((vertex.ScreenX() + 1) / 2 * width, (vertex.ScreenY() - 1) / 2 * -height, z);
 }
 
 void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)

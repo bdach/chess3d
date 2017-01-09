@@ -53,7 +53,6 @@ void Window::RenderScene(const Scene& scene)
 	SDL_RenderPresent(renderer);
 
 	FragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data);
-
 	for (auto mesh : scene.meshes)
 	{
 		std::vector<ShadedVertex> processed;
@@ -75,12 +74,12 @@ Window::~Window()
 
 int Window::ScreenX(const ShadedVertex& vertex) const
 {
-	return (vertex.x() + 1) / 2 * SCREEN_WIDTH;
+	return (vertex.ScreenX() + 1) / 2 * SCREEN_WIDTH;
 }
 
 int Window::ScreenY(const ShadedVertex& vertex) const
 {
-	return (vertex.y() - 1) / 2 * -SCREEN_HEIGHT;
+	return (vertex.ScreenY() - 1) / 2 * -SCREEN_HEIGHT;
 }
 
 bool Window::InBound(const int coord, const int max)

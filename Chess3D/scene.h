@@ -3,6 +3,7 @@
 #include <vector>
 #include "mesh.h"
 #include "camera.h"
+#include "light.h"
 
 class Scene
 {
@@ -12,4 +13,5 @@ public:
 
 	std::vector<Mesh> meshes;
 	std::vector<Camera> cameras;
+	std::vector<Light> lights;
 };
