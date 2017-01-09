@@ -1,5 +1,4 @@
-﻿#include <exception>
-#include "window.h"
+﻿#include "window.h"
 #include "v_shader.h"
 
 Window::Window(const std::string& _title) : pixel_data(SCREEN_WIDTH * SCREEN_HEIGHT * 4, 0)
@@ -52,7 +51,8 @@ void Window::RenderScene(const Scene& scene)
 {
 	SDL_RenderPresent(renderer);
 
-	FragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data);
+	PhongLightingModel lighting_model(scene.lights, scene.cameras[0]);
+	PhongFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
 	for (auto mesh : scene.meshes)
 	{
 		std::vector<ShadedVertex> processed;

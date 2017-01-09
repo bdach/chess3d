@@ -12,10 +12,11 @@ public:
 	Eigen::Matrix4f LookAt(Eigen::Vector3f _target);
 	Eigen::Matrix4f GetProjectionMatrix() const;
 	Eigen::Matrix4f GetViewMatrix() const;
+
+	Eigen::Vector3f eye;
 private:
 	float aspect_ratio, fov, near, far;
 
-	Eigen::Vector3f eye;
 	Eigen::Vector3f look_at;
 	Eigen::Vector3f up;
 

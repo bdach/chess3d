@@ -10,9 +10,9 @@ public:
 
 	float GetIntensity(Eigen::Vector3f point) const;
 	Eigen::Vector3f ambient, diffuse, specular;
+	Eigen::Vector3f position;
 private: 
 	float inner_cone, outer_cone;
 	float att_constant, att_linear, att_quadratic;
 	Eigen::Vector3f direction;
-	Eigen::Vector3f position;
 };

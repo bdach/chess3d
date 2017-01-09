@@ -7,30 +7,67 @@
 
 #define DEBUG
 
-FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data), depth_buffer(_width * _height)
+const CwiseClampOp<float> LightlessFragmentShader::clamp = CwiseClampOp<float>(0, 1);
+
+LightingModel::LightingModel(const std::vector<Light>& lights, const Camera& camera) : lights(lights)
 {
-	r = g = b = 0xff;
+	eye = camera.eye;
+}
+
+Eigen::Vector3f PhongLightingModel::GetColor(const Material& material, Eigen::Vector3f pos, Eigen::Vector3f n) const
+{
+	Eigen::Array3f result = material.ambient.array() * ambient;
+	for (auto light : lights)
+	{
+		auto l = (light.position - pos).normalized();
+		auto nl = n.dot(l);
+		if (nl < 0) continue;
+		auto diffuse = light.diffuse.array() * material.diffuse.array() * nl * light.GetIntensity(pos);
+		result += diffuse;
+		auto v = (eye - pos).normalized();
+		auto r = (2 * nl * n - l).normalized();
+		auto specular = light.specular.array() * material.specular.array() * pow(r.dot(v), material.shininess) * light.GetIntensity(pos);
+		result += specular;
+	}
+	return result.unaryExpr(clamp);
+}
+
+Eigen::Vector3f BlinnPhongLightingModel::GetColor(const Material& material, Eigen::Vector3f pos, Eigen::Vector3f n) const
+{
+	Eigen::Array3f result = material.ambient.array() * ambient;
+	for (auto light : lights)
+	{
+		auto l = (light.position - pos).normalized();
+		auto nl = n.dot(l);
+		if (nl < 0) continue;
+		result += light.diffuse.array() * material.diffuse.array() * nl * light.GetIntensity(pos);
+		auto v = (eye - pos).normalized();
+		auto h = (l + v).normalized();
+		result += light.specular.array() * material.specular.array() * pow(n.dot(h), material.shininess) * light.GetIntensity(pos);
+	}
+	return result.unaryExpr(clamp);
+}
+
+LightlessFragmentShader::LightlessFragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data), depth_buffer(_width * _height)
+{
 	width = _width;
 	height = _height;
-
 	for (auto i = 0; i < _width * _height; ++i)
 	{
 		depth_buffer[i] = INT_MAX - 1;
 	}
 }
 
-void FragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+void LightlessFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
-	r = mesh.color.x() * 255;
-	g = mesh.color.y() * 255;
-	b = mesh.color.z() * 255;
+	color = mesh.material.diffuse;
 	for (auto face : mesh.faces)
 	{
 		Paint(face, vertices);
 	}
 }
 
-void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
+void LightlessFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
 {
 	std::vector<Eigen::Vector3i> screen;
 	for (auto index : face.indices)
@@ -44,13 +81,13 @@ void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& ve
 	FillTopFlatTriangle(screen[0], screen[1], screen[2], z_coords);
 }
 
-Eigen::Vector3i FragmentShader::TransformCoords(const ShadedVertex& vertex) const
+Eigen::Vector3i LightlessFragmentShader::TransformCoords(const ShadedVertex& vertex) const
 {
 	int z = (vertex.ScreenZ() >= -1 && vertex.ScreenZ() <= 1) ? (vertex.ScreenZ() + 1) / 2 * INT_MAX - 1 : INT_MAX;
 	return Eigen::Vector3i((vertex.ScreenX() + 1) / 2 * width, (vertex.ScreenY() - 1) / 2 * -height, z);
 }
 
-void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
+void LightlessFragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
 	int y_max = v2.y();
 	float m1 = static_cast<float>(v2.x() - v1.x()) / (v2.y() - v1.y());
@@ -67,7 +104,7 @@ void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i 
 	}
 }
 
-void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
+void LightlessFragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
 	int y_min = v2.y();
 	float m1 = static_cast<float>(v1.x() - v3.x()) / (v1.y() - v3.y());
@@ -84,23 +121,23 @@ void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2,
 	}      
 }
 
-void FragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
+void LightlessFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
 {
-	for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
+	for (int x = fmax(0, x1); x < fmin(x2, width); ++x)
 	{
 		if (y < 0 || y >= height) break;
 		int offset = width * y + x;
 		int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
 		if (z >= depth_buffer[offset]) continue;
 		depth_buffer[offset] = z;
-		pixel_data[4 * offset + 0] = r;
-		pixel_data[4 * offset + 1] = g;
-		pixel_data[4 * offset + 2] = b;
+		pixel_data[4 * offset + 0] = color.x() * 255;
+		pixel_data[4 * offset + 1] = color.y() * 255;
+		pixel_data[4 * offset + 2] = color.z() * 255;
 		pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
 	}
 }
 
-Eigen::RowVector3f FragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)
+Eigen::RowVector3f LightlessFragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)
 {
 	Eigen::Matrix3f A;
 	A <<
@@ -108,6 +145,117 @@ Eigen::RowVector3f FragmentShader::GetBarycentricCoordinates(const Eigen::Vector
 		v1.y(), v2.y(), v3.y(),
 		1, 1, 1;
 	Eigen::Vector3f b(x, y, 1);
-	Eigen::Vector3f result = A.colPivHouseholderQr().solve(b);
+	Eigen::Vector3f result = A.fullPivHouseholderQr().solve(b);
 	return result.transpose();
+}
+
+FlatFragmentShader::FlatFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)
+{
+}
+
+void FlatFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+{
+	material = mesh.material;
+	LightlessFragmentShader::Paint(mesh, vertices);
+}
+
+void FlatFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
+{
+	auto v1 = vertices[face.indices[0]], v2 = vertices[face.indices[1]], v3 = vertices[face.indices[2]];
+	auto pos = (v1.original_coords + v2.original_coords + v3.original_coords) / 3;
+	auto n = (v1.normal + v2.normal + v3.normal) / 3;
+	color = lighting_model.GetColor(material, pos, n);
+	LightlessFragmentShader::Paint(face, vertices);
+}
+
+GouraudFragmentShader::GouraudFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)
+{
+}
+
+void GouraudFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+{
+	material = mesh.material;
+	LightlessFragmentShader::Paint(mesh, vertices);
+}
+
+void GouraudFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
+{
+	std::vector<ShadedVertex> shaded_vertices;
+	for (auto index : face.indices)
+	{
+		shaded_vertices.push_back(vertices[index]);
+	}
+	std::sort(shaded_vertices.begin(), shaded_vertices.end(), [](const ShadedVertex& v1, const ShadedVertex& v2) -> bool { return v1.ScreenY() > v2.ScreenY(); });
+	interpolation_matrix <<
+		lighting_model.GetColor(material, shaded_vertices[0].original_coords, shaded_vertices[0].normal),
+		lighting_model.GetColor(material, shaded_vertices[1].original_coords, shaded_vertices[1].normal),
+		lighting_model.GetColor(material, shaded_vertices[2].original_coords, shaded_vertices[2].normal);
+	interpolation_matrix.transposeInPlace();
+	LightlessFragmentShader::Paint(face, vertices);
+}
+
+void GouraudFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
+{
+	for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
+	{
+		if (y < 0 || y >= height) break;
+		int offset = width * y + x;
+		auto barycentric = GetBarycentricCoordinates(v1, v2, v3, x, y);
+		int z = barycentric * z_coords;
+		if (z >= depth_buffer[offset]) continue;
+		depth_buffer[offset] = z;
+		color = (barycentric * interpolation_matrix).unaryExpr(clamp);
+		pixel_data[4 * offset + 0] = color.x() * 255;
+		pixel_data[4 * offset + 1] = color.y() * 255;
+		pixel_data[4 * offset + 2] = color.z() * 255;
+		pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
+	}
+}
+
+PhongFragmentShader::PhongFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)
+{
+}
+
+void PhongFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+{
+	material = mesh.material;
+	LightlessFragmentShader::Paint(mesh, vertices);
+}
+
+void PhongFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
+{
+	std::vector<ShadedVertex> shaded_vertices;
+	for (auto index : face.indices)
+	{
+		shaded_vertices.push_back(vertices[index]);
+	}
+	std::sort(shaded_vertices.begin(), shaded_vertices.end(), [](const ShadedVertex& v1, const ShadedVertex& v2) -> bool { return v1.ScreenY() > v2.ScreenY(); });
+	position_interp_matrix <<
+		shaded_vertices[0].original_coords, shaded_vertices[1].original_coords, shaded_vertices[2].original_coords;
+	normal_interp_matrix <<
+		shaded_vertices[0].normal, shaded_vertices[1].normal, shaded_vertices[2].normal;
+	position_interp_matrix.transposeInPlace();
+	normal_interp_matrix.transposeInPlace();
+	LightlessFragmentShader::Paint(face, vertices);
+}
+
+void PhongFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
+{
+	for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
+	{
+		if (y < 0 || y >= height) break;
+		int offset = width * y + x;
+		auto barycentric = GetBarycentricCoordinates(v1, v2, v3, x, y);
+		int z = barycentric * z_coords;
+		if (z >= depth_buffer[offset]) continue;
+		barycentric = barycentric.unaryExpr(clamp);
+		depth_buffer[offset] = z;
+		auto position = barycentric * position_interp_matrix;
+		auto normal = barycentric * normal_interp_matrix;
+		color = lighting_model.GetColor(material, position, normal);
+		pixel_data[4 * offset + 0] = color.x() * 255;
+		pixel_data[4 * offset + 1] = color.y() * 255;
+		pixel_data[4 * offset + 2] = color.z() * 255;
+		pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
+	}
 }

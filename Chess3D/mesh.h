@@ -10,6 +10,14 @@ public:
 	std::vector<unsigned int> indices;
 };
 
+struct Material
+{
+	Eigen::Vector3f ambient;
+	Eigen::Vector3f diffuse;
+	Eigen::Vector3f specular;
+	float shininess;
+};
+
 class Mesh
 {
 public:
@@ -18,7 +26,7 @@ public:
 
 	std::vector<Vertex> vertices;
 	std::vector<Face> faces;
-	Eigen::Vector3f color;
+	Material material;
 
 	Eigen::Matrix4f GetWorldMatrix() const;
 private:

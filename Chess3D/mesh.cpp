@@ -3,7 +3,6 @@
 Mesh::Mesh()
 {
 	world_matrix = Eigen::Matrix4f::Identity();
-	color = Eigen::Vector3f();
 }
 
 Mesh::Mesh(const aiMesh& mesh, const aiMaterial& material) : Mesh()
@@ -17,10 +16,19 @@ Mesh::Mesh(const aiMesh& mesh, const aiMaterial& material) : Mesh()
 		faces.push_back(Face(mesh.mFaces[i]));
 	}
 	aiColor4D color;
-	if (AI_SUCCESS == aiGetMaterialColor(&material, AI_MATKEY_COLOR_DIFFUSE, &color))
+	if (AI_SUCCESS == material.Get(AI_MATKEY_COLOR_AMBIENT, color))
 	{
-		this->color = Eigen::Vector3f(color.r, color.g, color.b);
+		this->material.ambient = Eigen::Vector3f(color.r, color.g, color.b);
 	}
+	if (AI_SUCCESS == material.Get(AI_MATKEY_COLOR_DIFFUSE, color))
+	{
+		this->material.diffuse = Eigen::Vector3f(color.r, color.g, color.b);
+	}
+	if (AI_SUCCESS == material.Get(AI_MATKEY_COLOR_SPECULAR, color))
+	{
+		this->material.specular = Eigen::Vector3f(color.r, color.g, color.b);
+	}
+	material.Get(AI_MATKEY_SHININESS, this->material.shininess);
 }
 
 Eigen::Matrix4f Mesh::GetWorldMatrix() const
