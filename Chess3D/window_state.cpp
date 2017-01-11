@@ -35,9 +35,14 @@ std::string StateManager::MeshClicked(Mesh& mesh) const
 bool StateManager::NextFrame()
 {
 	auto ticks = SDL_GetTicks();
-	auto result = state->NextFrame(ticks - last_ticks);
+	auto result = state->NextFrame(ticks - last_ticks, position);
 	last_ticks = ticks;
 	return result;
+}
+
+Eigen::Vector3f StateManager::FollowPosition()
+{
+	return position;
 }
 
 std::string IdleState::MeshClicked(Mesh& mesh)
@@ -73,12 +78,12 @@ AnimationState::AnimationState(Mesh& piece, const Mesh& field) : piece(piece)
 	remaining = ANIMATION_LENGTH;
 }
 
-bool AnimationState::NextFrame(int ticks)
+bool AnimationState::NextFrame(int ticks, Eigen::Vector3f& position)
 {
 	auto toMove = ticks < remaining ? ticks : remaining;
 	remaining -= toMove;
 	auto t = static_cast<float>(remaining) / ANIMATION_LENGTH;
-	auto position = end * (1.0f - t) + start * t;
+	position = end * (1.0f - t) + start * t;
 	piece.Move(position);
 	if (remaining == 0)
 	{

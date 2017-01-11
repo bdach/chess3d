@@ -46,8 +46,8 @@ public:
 	Window(const Window& _other) = delete;
 	Window& operator=(const Window& _other) = delete;
 	void Show();
-	void RenderScene(const Scene& scene);
-	void RenderClickMap(const Scene& scene);
+	void RenderScene(bool click_map);
+	void RenderClickMap();
 	~Window();
 
 private:
@@ -60,6 +60,7 @@ private:
 	SDL_Texture* frame_buffer;
 	WindowMessage* message;
 	StateManager state_manager;
+	CameraNumber camera_number = STATIC_CAMERA;
 	std::vector<unsigned char> pixel_data;
 	std::vector<unsigned char> click_map;
 	
@@ -67,6 +68,10 @@ private:
 	int ScreenY(const ShadedVertex& coords) const;
 	static bool InBound(const int coord, const int max);
 
+	void PrepareCameras() const;
+	void FollowTarget(Eigen::Vector3f follow_position) const;
+
 	// events
 	void MouseButtonUp(SDL_MouseButtonEvent e);
+	void KeyDown(SDL_KeyboardEvent e);
 };

@@ -10,6 +10,7 @@ public:
 	Camera(Eigen::Vector3f eye, Eigen::Vector3f look_at);
 	explicit Camera(const aiCamera& camera);
 
+	Eigen::Matrix4f Move(Eigen::Vector3f _target, Eigen::Vector3f _look_at);
 	Eigen::Matrix4f LookAt(Eigen::Vector3f _target);
 	Eigen::Matrix4f GetProjectionMatrix() const;
 	Eigen::Matrix4f GetViewMatrix() const;

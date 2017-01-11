@@ -1,6 +1,7 @@
 ﻿#include "window.h"
 #include "v_shader.h"
 #include <iostream>
+#include <set>
 
 WindowMessage::WindowMessage(SDL_Renderer* renderer, SDL_Window* window) : renderer(renderer)
 {
@@ -118,8 +119,8 @@ void Window::Show()
 {
 	SDL_RenderClear(renderer);
 	SDL_UpdateWindowSurface(window);
-	RenderScene(scene);
-	RenderClickMap(scene);
+	PrepareCameras();
+	RenderScene(true);
 	auto quit = false;
 	SDL_Event event;
 	while (!quit) {
@@ -134,29 +135,32 @@ void Window::Show()
 			case SDL_MOUSEBUTTONUP:
 				MouseButtonUp(event.button);
 				break;
+			case SDL_KEYDOWN:
+				KeyDown(event.key);
+				break;
 			default:
 				break;
 			}
 		}
 		if (state_manager.NextFrame())
 		{
-			RenderScene(scene);
-			RenderClickMap(scene);
+			FollowTarget(state_manager.FollowPosition());
+			RenderScene(true);
 		}
 	}
 }
 
-void Window::RenderScene(const Scene& scene)
+void Window::RenderScene(bool click_map)
 {
 	memset(&pixel_data[0], 0x10, pixel_data.size());
 
-	PhongLightingModel lighting_model(scene.lights, scene.cameras[0]);
-	FlatFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
+	PhongLightingModel lighting_model(scene.lights, scene.cameras[camera_number]);
+	PhongFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
 	for (auto mesh : scene.meshes)
 	{
 		std::vector<ShadedVertex> processed;
 		auto back_inserter = std::back_inserter(processed);
-		VertexShader::TransformCoords(mesh, scene.cameras[0], back_inserter);
+		VertexShader::TransformCoords(mesh, scene.cameras[camera_number], back_inserter);
 		fragment_shader.Paint(mesh, processed);
 	}
 	SDL_UpdateTexture(frame_buffer, nullptr, &pixel_data[0], SCREEN_WIDTH * 4);
@@ -168,9 +172,13 @@ void Window::RenderScene(const Scene& scene)
 		SDL_RenderCopy(renderer, message->GetTexture(), nullptr, &msg_location);
 	}
 	SDL_RenderPresent(renderer);
+	if (click_map)
+	{
+		RenderClickMap();
+	}
 }
 
-void Window::RenderClickMap(const Scene& scene)
+void Window::RenderClickMap()
 {
 	memset(&click_map[0], 0xff, click_map.size());
 	ClickMapFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, click_map);
@@ -178,7 +186,7 @@ void Window::RenderClickMap(const Scene& scene)
 	{
 		std::vector<ShadedVertex> processed;
 		auto back_inserter = std::back_inserter(processed);
-		VertexShader::TransformCoords(mesh, scene.cameras[0], back_inserter);
+		VertexShader::TransformCoords(mesh, scene.cameras[camera_number], back_inserter);
 		fragment_shader.Paint(mesh, processed);
 	}
 }
@@ -209,6 +217,25 @@ bool Window::InBound(const int coord, const int max)
 	return coord >= 0 && coord < max;
 }
 
+void Window::PrepareCameras() const
+{
+	scene.cameras.clear();
+	// static
+	scene.cameras.push_back(Camera(Eigen::Vector3f(16, 26, 15), Eigen::Vector3f(6, 7, 0)));
+	// follow
+	scene.cameras.push_back(Camera(Eigen::Vector3f(7, -2, 15)));
+	// object
+	scene.cameras.push_back(Camera(Eigen::Vector3f(16, 26, 15), Eigen::Vector3f(6, 7, 0)));
+}
+
+void Window::FollowTarget(Eigen::Vector3f follow_position) const
+{
+	scene.cameras[FOLLOW_CAMERA].LookAt(follow_position);
+	Eigen::Vector3f camera_pos = follow_position + Eigen::Vector3f(-15, 0, 10);
+	Eigen::Vector3f look_pos = follow_position + Eigen::Vector3f(0, 0, 2);
+	scene.cameras[OBJECT_CAMERA].Move(camera_pos, look_pos);
+}
+
 void Window::MouseButtonUp(SDL_MouseButtonEvent e)
 {
 	auto offset = e.y * SCREEN_WIDTH + e.x;
@@ -218,11 +245,40 @@ void Window::MouseButtonUp(SDL_MouseButtonEvent e)
 	if (message.size() > 0)
 	{
 		this->message->SetText(message);
-		RenderScene(scene);
+		RenderScene(false);
 	} 
 	else
 	{
 		this->message->Hide();
-		RenderScene(scene);
+		RenderScene(true);
 	}
+}
+
+void Window::KeyDown(SDL_KeyboardEvent e)
+{
+	std::set<SDL_Keycode> supported_codes = 
+	{
+		SDL_SCANCODE_1,
+		SDL_SCANCODE_2,
+		SDL_SCANCODE_3
+	};
+	if (supported_codes.find(e.keysym.scancode) == supported_codes.end()) return;
+	switch (e.keysym.scancode)
+	{
+	case SDL_SCANCODE_1:
+		camera_number = STATIC_CAMERA;
+		message->SetText("Static camera");
+		break;
+	case SDL_SCANCODE_2:
+		camera_number = FOLLOW_CAMERA;
+		message->SetText("Follow camera");
+		break;
+	case SDL_SCANCODE_3:
+		camera_number = OBJECT_CAMERA;
+		message->SetText("Object camera");
+		break;
+	default:
+		break;
+	}
+	RenderScene(true);
 }

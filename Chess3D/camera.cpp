@@ -38,6 +38,12 @@ Camera::Camera(const aiCamera& camera)
 	LookAt(Eigen::Vector3f(camera.mLookAt.x, camera.mLookAt.y, camera.mLookAt.z));
 }
 
+Eigen::Matrix4f Camera::Move(Eigen::Vector3f _target, Eigen::Vector3f _look_at)
+{
+	eye = _target;
+	return LookAt(_look_at);
+}
+
 Eigen::Matrix4f Camera::LookAt(Eigen::Vector3f _target)
 {
 	look_at = _target;
