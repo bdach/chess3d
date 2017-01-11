@@ -35,7 +35,6 @@ void Window::Show(const Scene& scene)
 	SDL_UpdateWindowSurface(window);
 	auto quit = false;
 	SDL_Event event;
-	RenderScene(scene);
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0)
 		{
@@ -44,6 +43,8 @@ void Window::Show(const Scene& scene)
 				quit = true;
 			}
 		}
+		// if animation
+		RenderScene(scene);
 	}
 }
 

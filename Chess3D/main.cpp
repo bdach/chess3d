@@ -14,7 +14,7 @@ Scene LoadObject(const std::string& path);
 int main(int argc, char **argv)
 {
 	const std::string path = "../Chess3D/Models/chess.dae";
-	Window window("SDL Test");
+	Window window("Chess3D");
 	auto scene = LoadObject(path);
 	Camera camera(Eigen::Vector3f(16, 26, 15));
 	camera.LookAt(Eigen::Vector3f(6, 7, 0));

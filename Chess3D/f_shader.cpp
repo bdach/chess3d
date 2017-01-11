@@ -145,7 +145,7 @@ Eigen::RowVector3f LightlessFragmentShader::GetBarycentricCoordinates(const Eige
 		v1.y(), v2.y(), v3.y(),
 		1, 1, 1;
 	Eigen::Vector3f b(x, y, 1);
-	Eigen::Vector3f result = A.fullPivHouseholderQr().solve(b);
+	Eigen::Vector3f result = A.colPivHouseholderQr().solve(b);
 	return result.transpose();
 }
 
@@ -247,11 +247,11 @@ void PhongFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, E
 		int offset = width * y + x;
 		auto barycentric = GetBarycentricCoordinates(v1, v2, v3, x, y);
 		int z = barycentric * z_coords;
-		if (z >= depth_buffer[offset]) continue;
+		if (z > depth_buffer[offset]) continue;
 		barycentric = barycentric.unaryExpr(clamp);
 		depth_buffer[offset] = z;
 		auto position = barycentric * position_interp_matrix;
-		auto normal = barycentric * normal_interp_matrix;
+		auto normal = (barycentric * normal_interp_matrix).normalized();
 		color = lighting_model.GetColor(material, position, normal);
 		pixel_data[4 * offset + 0] = color.x() * 255;
 		pixel_data[4 * offset + 1] = color.y() * 255;
