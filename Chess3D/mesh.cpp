@@ -62,15 +62,13 @@ Eigen::Vector3f Mesh::GetPosition() const
 	return (world_matrix * Eigen::Vector4f(0, 0, 0, 1)).head<3>();
 }
 
-void Mesh::Translate(Eigen::Vector3f vec)
+void Mesh::Move(Eigen::Vector3f vec)
 {
-	Eigen::Matrix4f translation;
-	translation <<
+	world_matrix <<
 		1, 0, 0, vec.x(),
 		0, 1, 0, vec.y(),
 		0, 0, 1, vec.z(),
 		0, 0, 0, 1;
-	world_matrix = world_matrix * translation;
 }
 
 Face::Face(const aiFace& face)

@@ -5,9 +5,9 @@
 #include "window.h"
 #include "scene.h"
 
-#ifdef main
-#undef main
-#endif
+//#ifdef main
+//#undef main
+//#endif
 
 Scene LoadObject(const std::string& path);
 

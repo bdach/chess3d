@@ -20,6 +20,11 @@ Camera::Camera(Eigen::Vector3f _eye) : Camera(_eye, 3.0f / 4.0f, M_PI / 3, 0.1f,
 {
 }
 
+Camera::Camera(Eigen::Vector3f eye, Eigen::Vector3f look_at) : Camera(eye)
+{
+	LookAt(look_at);
+}
+
 Camera::Camera(const aiCamera& camera)
 {
 	eye = Eigen::Vector3f(camera.mPosition.x, camera.mPosition.y, camera.mPosition.z);

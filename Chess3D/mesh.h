@@ -41,7 +41,7 @@ public:
 	Eigen::Matrix4f GetWorldMatrix() const;
 	Eigen::Vector3f GetPosition() const;
 
-	void Translate(Eigen::Vector3f vec);
+	void Move(Eigen::Vector3f vec);
 private:
 	Eigen::Matrix4f world_matrix;
 };

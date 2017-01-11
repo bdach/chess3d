@@ -7,6 +7,7 @@ class Camera
 public:
 	Camera(Eigen::Vector3f _eye, float _aspect_ratio, float _fov, float _near, float _far); // wherever you are
 	explicit Camera(Eigen::Vector3f _eye);
+	Camera(Eigen::Vector3f eye, Eigen::Vector3f look_at);
 	explicit Camera(const aiCamera& camera);
 
 	Eigen::Matrix4f LookAt(Eigen::Vector3f _target);

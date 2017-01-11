@@ -2,6 +2,89 @@
 #include "v_shader.h"
 #include <iostream>
 
+WindowMessage::WindowMessage(SDL_Renderer* renderer, SDL_Window* window) : renderer(renderer)
+{
+	if (TTF_Init() < 0)
+	{
+		throw std::exception("Could not init TTF");
+	}
+	texture = nullptr;
+	surface = SDL_GetWindowSurface(window);
+	if (surface == nullptr)
+	{
+		throw std::exception("Could not init surface");
+	}
+	color = { 0xff, 0xff, 0xff };
+	visible = false;
+	font = TTF_OpenFont("../Chess3D/Fonts/iosevka-medium.ttf", 24);
+}
+
+
+WindowMessage::~WindowMessage()
+{
+	CleanUp();
+	if (surface != nullptr)
+	{
+		SDL_FreeSurface(surface);
+	}
+	if (font != nullptr)
+	{
+		TTF_CloseFont(font);
+	}
+	TTF_Quit();
+}
+
+void WindowMessage::SetText(std::string text)
+{
+	CleanUp();
+	RenderText(text);
+}
+
+void WindowMessage::SetColor(uint8_t r, uint8_t g, uint8_t b)
+{
+	color = { r, g, b };
+}
+
+SDL_Texture* WindowMessage::GetTexture() const
+{
+	return texture;
+}
+
+void WindowMessage::Hide()
+{
+	visible = false;
+}
+
+bool WindowMessage::IsVisible() const
+{
+	return visible;
+}
+
+int WindowMessage::Width() const
+{
+	return surface->w;
+}
+
+int WindowMessage::Height() const
+{
+	return surface->h;
+}
+
+void WindowMessage::CleanUp() const
+{
+	if (texture != nullptr)
+	{
+		SDL_DestroyTexture(texture);
+	}
+}
+
+void WindowMessage::RenderText(std::string text)
+{
+	visible = true;
+	surface = TTF_RenderText_Solid(font, text.c_str(), color);
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+}
+
 Window::Window(const std::string& _title, Scene& scene) : pixel_data(SCREEN_WIDTH * SCREEN_HEIGHT * 4, 0), click_map(SCREEN_WIDTH * SCREEN_HEIGHT, 0xff), scene(scene)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -28,6 +111,7 @@ Window::Window(const std::string& _title, Scene& scene) : pixel_data(SCREEN_WIDT
 	{
 		throw std::exception("Could not create framebuffer texture");
 	}
+	message = new WindowMessage(renderer, window);
 }
 
 void Window::Show()
@@ -35,12 +119,11 @@ void Window::Show()
 	SDL_RenderClear(renderer);
 	SDL_UpdateWindowSurface(window);
 	RenderScene(scene);
-	std::cerr << "this is scene" << std::endl;
 	RenderClickMap(scene);
-	std::cerr << "this is clickmap" << std::endl;
 	auto quit = false;
 	SDL_Event event;
 	while (!quit) {
+		state_manager.AdvanceStates();
 		while (SDL_PollEvent(&event) != 0)
 		{
 			switch (event.type)
@@ -54,6 +137,11 @@ void Window::Show()
 			default:
 				break;
 			}
+		}
+		if (state_manager.NextFrame())
+		{
+			RenderScene(scene);
+			RenderClickMap(scene);
 		}
 	}
 }
@@ -74,6 +162,12 @@ void Window::RenderScene(const Scene& scene)
 	SDL_UpdateTexture(frame_buffer, nullptr, &pixel_data[0], SCREEN_WIDTH * 4);
 	SDL_RenderCopy(renderer, frame_buffer, nullptr, nullptr);
 	SDL_RenderPresent(renderer);
+	if (message->IsVisible())
+	{
+		SDL_Rect msg_location = { 10, 10, message->Width(), message->Height() };
+		SDL_RenderCopy(renderer, message->GetTexture(), nullptr, &msg_location);
+	}
+	SDL_RenderPresent(renderer);
 }
 
 void Window::RenderClickMap(const Scene& scene)
@@ -91,9 +185,13 @@ void Window::RenderClickMap(const Scene& scene)
 
 Window::~Window()
 {
+	if (message != nullptr)
+	{
+		delete message;
+	}
 	SDL_DestroyWindow(window);
-	SDL_Quit();
 	SDL_DestroyRenderer(renderer);
+	SDL_Quit();
 }
 
 int Window::ScreenX(const ShadedVertex& vertex) const
@@ -115,10 +213,16 @@ void Window::MouseButtonUp(SDL_MouseButtonEvent e)
 {
 	auto offset = e.y * SCREEN_WIDTH + e.x;
 	auto index = click_map[offset];
-	auto& mesh = scene.meshes[index];
-	mesh.Translate(Eigen::Vector3f(0, 0, 0.5));
-	auto& camera = scene.cameras[0];
-	camera.LookAt(mesh.GetPosition());
-	RenderScene(scene);
-	RenderClickMap(scene);
+	if (index < 0 || index > scene.meshes.size()) return;
+	auto message = state_manager.MeshClicked(scene.meshes[index]);
+	if (message.size() > 0)
+	{
+		this->message->SetText(message);
+		RenderScene(scene);
+	} 
+	else
+	{
+		this->message->Hide();
+		RenderScene(scene);
+	}
 }
