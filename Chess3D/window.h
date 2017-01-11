@@ -10,13 +10,13 @@ public:
 	explicit Window(const std::string& _title);
 	Window(const Window& _other) = delete;
 	Window& operator=(const Window& _other) = delete;
-	void Show(const Scene& scene);
+	void Show(Scene& scene);
 	void RenderScene(const Scene& scene);
 	~Window();
 
 private:
-	const int SCREEN_WIDTH = 800;
-	const int SCREEN_HEIGHT = 600;
+	const int SCREEN_WIDTH = 640;
+	const int SCREEN_HEIGHT = 480;
 
 	SDL_Window* window;
 	SDL_Renderer* renderer;

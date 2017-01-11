@@ -13,7 +13,7 @@ Scene LoadObject(const std::string& path);
 
 int main(int argc, char **argv)
 {
-	const std::string path = "../Chess3D/Models/chess.dae";
+	const std::string path = "../Chess3D/Models/chess2.dae";
 	Window window("Chess3D");
 	auto scene = LoadObject(path);
 	Camera camera(Eigen::Vector3f(16, 26, 15));

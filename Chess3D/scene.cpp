@@ -2,10 +2,14 @@
 
 Scene::Scene(const aiScene& scene)
 {
-	for (unsigned int i = 0; i < scene.mNumMeshes; ++i)
+	auto root_node = scene.mRootNode;
+	for (unsigned int i = 0; i < root_node->mNumChildren; ++i)
 	{
-		auto mesh = scene.mMeshes[i];
-		meshes.push_back(Mesh(*mesh, *scene.mMaterials[mesh->mMaterialIndex]));
+		auto node = root_node->mChildren[i];
+		if (node->mNumMeshes == 0) continue;
+		auto mesh = scene.mMeshes[node->mMeshes[0]];
+		auto material = scene.mMaterials[mesh->mMaterialIndex];
+		meshes.push_back(Mesh(*node, *mesh, *material));
 	}
 	for (unsigned int i = 0; i < scene.mNumLights; ++i)
 	{

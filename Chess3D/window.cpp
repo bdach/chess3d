@@ -29,7 +29,7 @@ Window::Window(const std::string& _title) : pixel_data(SCREEN_WIDTH * SCREEN_HEI
 	}
 }
 
-void Window::Show(const Scene& scene)
+void Window::Show(Scene& scene)
 {
 	SDL_RenderClear(renderer);
 	SDL_UpdateWindowSurface(window);
@@ -44,13 +44,14 @@ void Window::Show(const Scene& scene)
 			}
 		}
 		// if animation
+		scene.meshes[0].Translate(Eigen::Vector3f(0.25f, 0, 0));
 		RenderScene(scene);
 	}
 }
 
 void Window::RenderScene(const Scene& scene)
 {
-	SDL_RenderPresent(renderer);
+	memset(&pixel_data[0], 0, pixel_data.size());
 
 	PhongLightingModel lighting_model(scene.lights, scene.cameras[0]);
 	PhongFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);

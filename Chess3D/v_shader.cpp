@@ -29,6 +29,6 @@ void VertexShader::TransformCoords(const Mesh& mesh, const Camera& camera, std::
 	{
 		Eigen::Vector4f coords = matrix * it->vector;
 		coords /= coords.w();
-		iterator = ShadedVertex(it->vector, coords, it->normal);
+		iterator = ShadedVertex(mesh.GetWorldMatrix() * it->vector, coords, it->normal);
 	}
 }
