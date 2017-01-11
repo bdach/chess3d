@@ -139,14 +139,17 @@ void LightlessFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v
 
 Eigen::RowVector3f LightlessFragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)
 {
-	Eigen::Matrix3f A;
-	A <<
-		v1.x(), v2.x(), v3.x(),
-		v1.y(), v2.y(), v3.y(),
-		1, 1, 1;
-	Eigen::Vector3f b(x, y, 1);
-	Eigen::Vector3f result = A.colPivHouseholderQr().solve(b);
-	return result.transpose();
+	Eigen::Vector2f p(x, y), a(v1.x(), v1.y()), b(v2.x(), v2.y()), c(v3.x(), v3.y());
+	Eigen::Vector2f t0 = b - a, t1 = c - a, t2 = p - a;
+	auto d00 = t0.dot(t0);
+	auto d01 = t0.dot(t1);
+	auto d11 = t1.dot(t1);
+	auto d20 = t2.dot(t0);
+	auto d21 = t2.dot(t1);
+	auto denom = d00 * d11 - d01 * d01;
+	auto v = (d11 * d20 - d01 * d21) / denom;
+	auto w = (d00 * d21 - d01 * d20) / denom;
+	return Eigen::Vector3f(1.0f - v - w, v, w);
 }
 
 FlatFragmentShader::FlatFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)

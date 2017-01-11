@@ -59,7 +59,7 @@ Eigen::Matrix4f Mesh::GetWorldMatrix() const
 
 Eigen::Vector3f Mesh::GetPosition() const
 {
-	return world_matrix.col(3).head<3>();
+	return (world_matrix * Eigen::Vector4f(0, 0, 0, 1)).head<3>();
 }
 
 void Mesh::Translate(Eigen::Vector3f vec)

@@ -25,8 +25,6 @@ private:
 	SDL_Texture* frame_buffer;
 	std::vector<unsigned char> pixel_data;
 	std::vector<unsigned char> click_map;
-
-	bool animating = false;
 	
 	int ScreenX(const ShadedVertex& coords) const;
 	int ScreenY(const ShadedVertex& coords) const;

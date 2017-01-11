@@ -55,12 +55,6 @@ void Window::Show()
 				break;
 			}
 		}
-		// if animation
-		if (animating)
-		{
-			scene.meshes[0].Translate(Eigen::Vector3f(0.25f, 0, 0));
-			RenderScene(scene);
-		}
 	}
 }
 
@@ -69,7 +63,7 @@ void Window::RenderScene(const Scene& scene)
 	memset(&pixel_data[0], 0x10, pixel_data.size());
 
 	PhongLightingModel lighting_model(scene.lights, scene.cameras[0]);
-	PhongFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
+	FlatFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
 	for (auto mesh : scene.meshes)
 	{
 		std::vector<ShadedVertex> processed;
@@ -119,7 +113,6 @@ bool Window::InBound(const int coord, const int max)
 
 void Window::MouseButtonUp(SDL_MouseButtonEvent e)
 {
-	if (animating) return;
 	auto offset = e.y * SCREEN_WIDTH + e.x;
 	auto index = click_map[offset];
 	auto& mesh = scene.meshes[index];
@@ -127,6 +120,5 @@ void Window::MouseButtonUp(SDL_MouseButtonEvent e)
 	auto& camera = scene.cameras[0];
 	camera.LookAt(mesh.GetPosition());
 	RenderScene(scene);
-	std::cerr << "done" << std::endl;
 	RenderClickMap(scene);
 }
