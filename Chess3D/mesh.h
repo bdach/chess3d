@@ -18,6 +18,13 @@ struct Material
 	float shininess;
 };
 
+enum MeshType
+{
+	UNKNOWN = 0,
+	PIECE,
+	FIELD
+};
+
 class Mesh
 {
 public:
@@ -28,11 +35,13 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<Face> faces;
 	Material material;
+	MeshType mesh_type = UNKNOWN;
+	std::string name;
 
 	Eigen::Matrix4f GetWorldMatrix() const;
+	Eigen::Vector3f GetPosition() const;
 
 	void Translate(Eigen::Vector3f vec);
-	void MoveTo(Eigen::Vector3f vec);
 private:
 	Eigen::Matrix4f world_matrix;
 };

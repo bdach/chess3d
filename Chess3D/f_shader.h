@@ -106,3 +106,14 @@ protected:
 	Material material;
 	Eigen::Matrix3f position_interp_matrix, normal_interp_matrix;
 };
+
+class ClickMapFragmentShader : public LightlessFragmentShader
+{
+public:
+	ClickMapFragmentShader(int width, int height, std::vector<unsigned char>& click_map) : LightlessFragmentShader(width, height, click_map) {}
+	void Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices) override;
+protected:
+	void DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y) override;
+
+	int counter = 0;
+};

@@ -39,11 +39,27 @@ Mesh::Mesh(const aiNode& node, const aiMesh& mesh, const aiMaterial& material) :
 		transform.b1, transform.b2, transform.b3, transform.b4,
 		transform.c1, transform.c2, transform.c3, transform.c4,
 		transform.d1, transform.d2, transform.d3, transform.d4;
+
+	name = std::string(node.mName.C_Str());
+	if (name.length() == 0) mesh_type = UNKNOWN;
+	if (name.find("_") == std::string::npos)
+	{
+		mesh_type = FIELD;
+	}
+	else
+	{
+		mesh_type = PIECE;
+	}
 }
 
 Eigen::Matrix4f Mesh::GetWorldMatrix() const
 {
 	return world_matrix;
+}
+
+Eigen::Vector3f Mesh::GetPosition() const
+{
+	return world_matrix.col(3).head<3>();
 }
 
 void Mesh::Translate(Eigen::Vector3f vec)

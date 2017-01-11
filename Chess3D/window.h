@@ -7,23 +7,31 @@
 class Window
 {
 public:
-	explicit Window(const std::string& _title);
+	Window(const std::string& _title, Scene& scnee);
 	Window(const Window& _other) = delete;
 	Window& operator=(const Window& _other) = delete;
-	void Show(Scene& scene);
+	void Show();
 	void RenderScene(const Scene& scene);
+	void RenderClickMap(const Scene& scene);
 	~Window();
 
 private:
-	const int SCREEN_WIDTH = 640;
-	const int SCREEN_HEIGHT = 480;
+	const int SCREEN_WIDTH = 1024;
+	const int SCREEN_HEIGHT = 768;
 
+	Scene& scene;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Texture* frame_buffer;
 	std::vector<unsigned char> pixel_data;
+	std::vector<unsigned char> click_map;
+
+	bool animating = false;
 	
 	int ScreenX(const ShadedVertex& coords) const;
 	int ScreenY(const ShadedVertex& coords) const;
 	static bool InBound(const int coord, const int max);
+
+	// events
+	void MouseButtonUp(SDL_MouseButtonEvent e);
 };

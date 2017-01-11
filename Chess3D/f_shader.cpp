@@ -196,7 +196,7 @@ void GouraudFragmentShader::Paint(const Face& face, const std::vector<ShadedVert
 
 void GouraudFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
 {
-	for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
+	for (int x = fmax(0, x1); x < fmin(x2, width); ++x)
 	{
 		if (y < 0 || y >= height) break;
 		int offset = width * y + x;
@@ -241,7 +241,7 @@ void PhongFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex
 
 void PhongFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
 {
-	for (int x = fmax(0, x1); x <= fmin(x2, width); ++x)
+	for (int x = fmax(0, x1); x < fmin(x2, width); ++x)
 	{
 		if (y < 0 || y >= height) break;
 		int offset = width * y + x;
@@ -257,5 +257,24 @@ void PhongFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, E
 		pixel_data[4 * offset + 1] = color.y() * 255;
 		pixel_data[4 * offset + 2] = color.z() * 255;
 		pixel_data[4 * offset + 3] = SDL_ALPHA_OPAQUE;
+	}
+}
+
+void ClickMapFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+{
+	LightlessFragmentShader::Paint(mesh, vertices);
+	counter++;
+}
+
+void ClickMapFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
+{
+	for (int x = fmax(0, x1); x < fmin(x2, width); ++x)
+	{
+		if (y < 0 || y >= height) break;
+		int offset = width * y + x;
+		int z = GetBarycentricCoordinates(v1, v2, v3, x, y) * z_coords;
+		if (z >= depth_buffer[offset]) continue;
+		depth_buffer[offset] = z;
+		pixel_data[offset] = counter;
 	}
 }
