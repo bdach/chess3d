@@ -105,7 +105,7 @@
   </library_lights>
   <library_images/>
   <library_effects>
-    <effect id="black-effect">
+    <effect id="white-effect">
       <profile_COMMON>
         <technique sid="common">
           <phong>
@@ -131,7 +131,7 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="white-effect">
+    <effect id="black-effect">
       <profile_COMMON>
         <technique sid="common">
           <phong>
@@ -3659,7 +3659,7 @@
   <library_controllers/>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="b_pa" name="b_pa" type="NODE">
+      <node id="b_pa" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_017-mesh" name="b_pa">
           <bind_material>
@@ -3669,7 +3669,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_K" name="b_K" type="NODE">
+      <node id="b_K" name="Black king" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 8 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_015-mesh" name="b_K">
           <bind_material>
@@ -3679,7 +3679,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Q" name="b_Q" type="NODE">
+      <node id="b_Q" name="Black queen" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_013-mesh" name="b_Q">
           <bind_material>
@@ -3689,7 +3689,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Bc" name="b_Bc" type="NODE">
+      <node id="b_Bc" name="Black bishop" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 4 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_009-mesh" name="b_Bc">
           <bind_material>
@@ -3699,7 +3699,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Nb" name="b_Nb" type="NODE">
+      <node id="b_Nb" name="Black knight" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 2 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_005-mesh" name="b_Nb">
           <bind_material>
@@ -3709,7 +3709,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Ra" name="b_Ra" type="NODE">
+      <node id="b_Ra" name="Black rook" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_002-mesh" name="b_Ra">
           <bind_material>
@@ -4367,7 +4367,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Rh" name="b_Rh" type="NODE">
+      <node id="b_Rh" name="Black rook" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 14 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_000-mesh" name="b_Rh">
           <bind_material>
@@ -4377,7 +4377,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Rh" name="w_Rh" type="NODE">
+      <node id="w_Rh" name="White rook" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 14 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_001-mesh" name="w_Rh">
           <bind_material>
@@ -4387,7 +4387,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Ra" name="w_Ra" type="NODE">
+      <node id="w_Ra" name="White rook" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_004-mesh" name="w_Ra">
           <bind_material>
@@ -4397,7 +4397,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Ng" name="b_Ng" type="NODE">
+      <node id="b_Ng" name="Black knight" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 12 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_006-mesh" name="b_Ng">
           <bind_material>
@@ -4407,7 +4407,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Ng" name="w_Ng" type="NODE">
+      <node id="w_Ng" name="White knight" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 12 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_007-mesh" name="w_Ng">
           <bind_material>
@@ -4417,7 +4417,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Nb" name="w_Nb" type="NODE">
+      <node id="w_Nb" name="White knight" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 2 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_008-mesh" name="w_Nb">
           <bind_material>
@@ -4427,7 +4427,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_Bf" name="b_Bf" type="NODE">
+      <node id="b_Bf" name="Black bishop" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 10 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_010-mesh" name="b_Bf">
           <bind_material>
@@ -4437,7 +4437,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Bf" name="w_Bf" type="NODE">
+      <node id="w_Bf" name="White bishop" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 10 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_011-mesh" name="w_Bf">
           <bind_material>
@@ -4447,7 +4447,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Bc" name="w_Bc" type="NODE">
+      <node id="w_Bc" name="White bishop" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 4 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_012-mesh" name="w_Bc">
           <bind_material>
@@ -4457,7 +4457,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_Q" name="w_Q" type="NODE">
+      <node id="w_Q" name="White queen" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_014-mesh" name="w_Q">
           <bind_material>
@@ -4467,7 +4467,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_K" name="w_K" type="NODE">
+      <node id="w_K" name="White king" type="NODE">
         <matrix sid="transform">1 0 0 14 0 1 0 8 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_016-mesh" name="w_K">
           <bind_material>
@@ -4477,7 +4477,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_pb" name="b_pb" type="NODE">
+      <node id="b_pb" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 2 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_018-mesh" name="b_pb">
           <bind_material>
@@ -4487,7 +4487,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_pd" name="b_pd" type="NODE">
+      <node id="b_pd" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_019-mesh" name="b_pd">
           <bind_material>
@@ -4497,7 +4497,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_pc" name="b_pc" type="NODE">
+      <node id="b_pc" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 4 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_020-mesh" name="b_pc">
           <bind_material>
@@ -4507,7 +4507,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_pg" name="b_pg" type="NODE">
+      <node id="b_pg" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 12 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_021-mesh" name="b_pg">
           <bind_material>
@@ -4517,7 +4517,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_ph" name="b_ph" type="NODE">
+      <node id="b_ph" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 14 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_022-mesh" name="b_ph">
           <bind_material>
@@ -4527,7 +4527,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_pf" name="b_pf" type="NODE">
+      <node id="b_pf" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 10 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_023-mesh" name="b_pf">
           <bind_material>
@@ -4537,7 +4537,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="b_pe" name="b_pe" type="NODE">
+      <node id="b_pe" name="Black pawn" type="NODE">
         <matrix sid="transform">1 0 0 2 0 1 0 8 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_024-mesh" name="b_pe">
           <bind_material>
@@ -4547,7 +4547,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pe" name="w_pe" type="NODE">
+      <node id="w_pe" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 8 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_025-mesh" name="w_pe">
           <bind_material>
@@ -4557,7 +4557,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pf" name="w_pf" type="NODE">
+      <node id="w_pf" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 10 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_026-mesh" name="w_pf">
           <bind_material>
@@ -4567,7 +4567,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_ph" name="w_ph" type="NODE">
+      <node id="w_ph" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 14 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_027-mesh" name="w_ph">
           <bind_material>
@@ -4577,7 +4577,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pg" name="w_pg" type="NODE">
+      <node id="w_pg" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 12 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_028-mesh" name="w_pg">
           <bind_material>
@@ -4587,7 +4587,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pc" name="w_pc" type="NODE">
+      <node id="w_pc" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 4 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_029-mesh" name="w_pc">
           <bind_material>
@@ -4597,7 +4597,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pd" name="w_pd" type="NODE">
+      <node id="w_pd" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_030-mesh" name="w_pd">
           <bind_material>
@@ -4607,7 +4607,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pb" name="w_pb" type="NODE">
+      <node id="w_pb" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 2 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_031-mesh" name="w_pb">
           <bind_material>
@@ -4617,7 +4617,7 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="w_pa" name="w_pa" type="NODE">
+      <node id="w_pa" name="White pawn" type="NODE">
         <matrix sid="transform">1 0 0 12 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Sphere_032-mesh" name="w_pa">
           <bind_material>

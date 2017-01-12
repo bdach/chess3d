@@ -42,7 +42,7 @@ Mesh::Mesh(const aiNode& node, const aiMesh& mesh, const aiMaterial& material) :
 
 	name = std::string(node.mName.C_Str());
 	if (name.length() == 0) mesh_type = UNKNOWN;
-	if (name.find("_") == std::string::npos)
+	if (name.find("White") == std::string::npos && name.find("Black") == std::string::npos)
 	{
 		mesh_type = FIELD;
 	}

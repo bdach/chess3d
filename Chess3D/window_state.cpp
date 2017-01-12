@@ -51,7 +51,7 @@ std::string IdleState::MeshClicked(Mesh& mesh)
 	{
 		next_state = new PieceSelectedState(mesh);
 		done = true;
-		return std::string();
+		return mesh.name;
 	}
 	return "Please select a piece.";
 }
@@ -66,7 +66,7 @@ std::string PieceSelectedState::MeshClicked(Mesh& mesh)
 	{
 		next_state = new AnimationState(piece, mesh);
 		done = true;
-		return std::string();
+		return piece.name + " to " + mesh.name;
 	}
 	return "Please select a field.";
 }
