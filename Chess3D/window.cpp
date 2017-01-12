@@ -17,7 +17,7 @@ WindowMessage::WindowMessage(SDL_Renderer* renderer, SDL_Window* window) : rende
 	}
 	color = { 0xff, 0xff, 0xff };
 	visible = false;
-	font = TTF_OpenFont("../Chess3D/Fonts/iosevka-medium.ttf", 24);
+	font = TTF_OpenFont("iosevka-medium.ttf", 24);
 }
 
 
@@ -154,7 +154,7 @@ void Window::RenderScene(bool click_map)
 {
 	memset(&pixel_data[0], 0x10, pixel_data.size());
 
-	PhongLightingModel lighting_model(scene.lights, scene.cameras[camera_number]);
+	BlinnPhongLightingModel lighting_model(scene.lights, scene.cameras[camera_number]);
 	PhongFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
 	for (auto mesh : scene.meshes)
 	{
@@ -223,7 +223,7 @@ void Window::PrepareCameras() const
 	// static
 	scene.cameras.push_back(Camera(Eigen::Vector3f(16, 26, 15), Eigen::Vector3f(6, 7, 0)));
 	// follow
-	scene.cameras.push_back(Camera(Eigen::Vector3f(7, -2, 15)));
+	scene.cameras.push_back(Camera(Eigen::Vector3f(7, -6, 15), Eigen::Vector3f(7, 7, 0)));
 	// object
 	scene.cameras.push_back(Camera(Eigen::Vector3f(16, 26, 15), Eigen::Vector3f(6, 7, 0)));
 }

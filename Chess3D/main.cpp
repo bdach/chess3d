@@ -5,15 +5,12 @@
 #include "window.h"
 #include "scene.h"
 
-#ifdef main
-#undef main
-#endif
 
 Scene LoadObject(const std::string& path);
 
 int main(int argc, char **argv)
 {
-	const std::string path = "../Chess3D/Models/chess2.dae";
+	const std::string path = "chess.dae";
 	auto scene = LoadObject(path);
 	Window window("Chess3D", scene);
 	window.Show();
