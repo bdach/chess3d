@@ -188,7 +188,8 @@ void GouraudFragmentShader::Paint(const Face& face, const std::vector<ShadedVert
 	{
 		shaded_vertices.push_back(vertices[index]);
 	}
-	std::sort(shaded_vertices.begin(), shaded_vertices.end(), [](const ShadedVertex& v1, const ShadedVertex& v2) -> bool { return v1.ScreenY() >= v2.ScreenY(); });
+	// suboptimal
+	std::sort(shaded_vertices.begin(), shaded_vertices.end(), [&](const ShadedVertex& v1, const ShadedVertex& v2) -> bool { return TransformCoords(v1).y() < TransformCoords(v2).y(); });
 	interpolation_matrix <<
 		lighting_model.GetColor(material, shaded_vertices[0].original_coords, shaded_vertices[0].normal),
 		lighting_model.GetColor(material, shaded_vertices[1].original_coords, shaded_vertices[1].normal),
@@ -232,7 +233,8 @@ void PhongFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex
 	{
 		shaded_vertices.push_back(vertices[index]);
 	}
-	std::sort(shaded_vertices.begin(), shaded_vertices.end(), [](const ShadedVertex& v1, const ShadedVertex& v2) -> bool { return v1.ScreenY() >= v2.ScreenY(); });
+	// suboptimal
+	std::sort(shaded_vertices.begin(), shaded_vertices.end(), [&](const ShadedVertex& v1, const ShadedVertex& v2) -> bool { return TransformCoords(v1).y() < TransformCoords(v2).y(); });
 	position_interp_matrix <<
 		shaded_vertices[0].original_coords, shaded_vertices[1].original_coords, shaded_vertices[2].original_coords;
 	normal_interp_matrix <<
