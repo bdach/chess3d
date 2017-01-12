@@ -150,12 +150,18 @@ void Window::Show()
 	}
 }
 
-void Window::RenderScene(bool click_map)
+void Window::RenderMessage() const
 {
-	memset(&pixel_data[0], 0x10, pixel_data.size());
+	if (message->IsVisible())
+	{
+		SDL_Rect msg_location = { 10, 10, message->Width(), message->Height() };
+		SDL_RenderCopy(renderer, message->GetTexture(), nullptr, &msg_location);
+	}
+	SDL_RenderPresent(renderer);
+}
 
-	BlinnPhongLightingModel lighting_model(scene.lights, scene.cameras[camera_number]);
-	PhongFragmentShader fragment_shader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, lighting_model);
+void Window::RenderMeshes(FragmentShader& fragment_shader)
+{
 	for (auto mesh : scene.meshes)
 	{
 		std::vector<ShadedVertex> processed;
@@ -166,16 +172,22 @@ void Window::RenderScene(bool click_map)
 	SDL_UpdateTexture(frame_buffer, nullptr, &pixel_data[0], SCREEN_WIDTH * 4);
 	SDL_RenderCopy(renderer, frame_buffer, nullptr, nullptr);
 	SDL_RenderPresent(renderer);
-	if (message->IsVisible())
-	{
-		SDL_Rect msg_location = { 10, 10, message->Width(), message->Height() };
-		SDL_RenderCopy(renderer, message->GetTexture(), nullptr, &msg_location);
-	}
-	SDL_RenderPresent(renderer);
+}
+
+void Window::RenderScene(bool click_map)
+{
+	memset(&pixel_data[0], 0x10, pixel_data.size());
+
+	LightingModel* lighting_model = GetLightingModel(scene.lights, scene.cameras[camera_number]);
+	FragmentShader* fragment_shader = GetShader(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_data, *lighting_model);
+	RenderMeshes(*fragment_shader);
+	RenderMessage();
 	if (click_map)
 	{
 		RenderClickMap();
 	}
+	delete lighting_model;
+	delete fragment_shader;
 }
 
 void Window::RenderClickMap()
@@ -236,6 +248,32 @@ void Window::FollowTarget(Eigen::Vector3f follow_position) const
 	scene.cameras[OBJECT_CAMERA].Move(camera_pos, look_pos);
 }
 
+FragmentShader* Window::GetShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) const
+{
+	switch (shader_type)
+	{
+	case S_FLAT:
+		return new FlatFragmentShader(width, height, pixel_data, lighting_model);
+	case S_GOURAUD:
+		return new GouraudFragmentShader(width, height, pixel_data, lighting_model);
+	case S_PHONG:
+		return new PhongFragmentShader(width, height, pixel_data, lighting_model);
+	}
+	return nullptr;
+}
+
+LightingModel* Window::GetLightingModel(const std::vector<Light>& lights, const Camera& camera) const
+{
+	switch (lighting_model)
+	{
+	case L_BLINN_PHONG:
+		return new BlinnPhongLightingModel(lights, camera); // action
+	case L_PHONG:
+		return new PhongLightingModel(lights, camera);
+	}
+	return nullptr;
+}
+
 void Window::MouseButtonUp(SDL_MouseButtonEvent e)
 {
 	auto offset = e.y * SCREEN_WIDTH + e.x;
@@ -260,7 +298,12 @@ void Window::KeyDown(SDL_KeyboardEvent e)
 	{
 		SDL_SCANCODE_1,
 		SDL_SCANCODE_2,
-		SDL_SCANCODE_3
+		SDL_SCANCODE_3,
+		SDL_SCANCODE_Q,
+		SDL_SCANCODE_W,
+		SDL_SCANCODE_E,
+		SDL_SCANCODE_R,
+		SDL_SCANCODE_T
 	};
 	if (supported_codes.find(e.keysym.scancode) == supported_codes.end()) return;
 	switch (e.keysym.scancode)
@@ -276,6 +319,26 @@ void Window::KeyDown(SDL_KeyboardEvent e)
 	case SDL_SCANCODE_3:
 		camera_number = OBJECT_CAMERA;
 		message->SetText("Object camera");
+		break;
+	case SDL_SCANCODE_Q:
+		lighting_model = L_BLINN_PHONG;
+		message->SetText("Blinn-Phong lighting model");
+		break;
+	case SDL_SCANCODE_W:
+		lighting_model = L_PHONG;
+		message->SetText("Phong lighting model");
+		break;
+	case SDL_SCANCODE_E:
+		shader_type = S_FLAT;
+		message->SetText("Flat shading");
+		break;
+	case SDL_SCANCODE_R:
+		shader_type = S_GOURAUD;
+		message->SetText("Gouraud shading");
+		break;
+	case SDL_SCANCODE_T:
+		shader_type = S_PHONG;
+		message->SetText("Phong shading");
 		break;
 	default:
 		break;

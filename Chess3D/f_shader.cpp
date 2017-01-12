@@ -7,7 +7,7 @@
 
 #define DEBUG
 
-const CwiseClampOp<float> LightlessFragmentShader::clamp = CwiseClampOp<float>(0, 1);
+const CwiseClampOp<float> FragmentShader::clamp = CwiseClampOp<float>(0, 1);
 
 LightingModel::LightingModel(const std::vector<Light>& lights, const Camera& camera) : lights(lights)
 {
@@ -40,15 +40,17 @@ Eigen::Vector3f BlinnPhongLightingModel::GetColor(const Material& material, Eige
 		auto l = (light.position - pos).normalized();
 		auto nl = n.dot(l);
 		if (nl < 0) continue;
-		result += light.diffuse.array() * material.diffuse.array() * nl * light.GetIntensity(pos);
+		auto diffuse = light.diffuse.array() * material.diffuse.array() * nl * light.GetIntensity(pos);
+		result += diffuse;
 		auto v = (eye - pos).normalized();
 		auto h = (l + v).normalized();
-		result += light.specular.array() * material.specular.array() * pow(n.dot(h), material.shininess) * light.GetIntensity(pos);
+		auto specular = light.specular.array() * material.specular.array() * pow(n.dot(h), material.shininess) * light.GetIntensity(pos);
+		result += specular;
 	}
 	return result.unaryExpr(clamp);
 }
 
-LightlessFragmentShader::LightlessFragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data), depth_buffer(_width * _height)
+FragmentShader::FragmentShader(int _width, int _height, std::vector<unsigned char>& _pixel_data) : pixel_data(_pixel_data), depth_buffer(_width * _height)
 {
 	width = _width;
 	height = _height;
@@ -58,7 +60,7 @@ LightlessFragmentShader::LightlessFragmentShader(int _width, int _height, std::v
 	}
 }
 
-void LightlessFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
+void FragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
 	color = mesh.material.diffuse;
 	for (auto face : mesh.faces)
@@ -67,7 +69,7 @@ void LightlessFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVe
 	}
 }
 
-void LightlessFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
+void FragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
 {
 	std::vector<Eigen::Vector3i> screen;
 	for (auto index : face.indices)
@@ -81,13 +83,13 @@ void LightlessFragmentShader::Paint(const Face& face, const std::vector<ShadedVe
 	FillTopFlatTriangle(screen[0], screen[1], screen[2], z_coords);
 }
 
-Eigen::Vector3i LightlessFragmentShader::TransformCoords(const ShadedVertex& vertex) const
+Eigen::Vector3i FragmentShader::TransformCoords(const ShadedVertex& vertex) const
 {
 	int z = (vertex.ScreenZ() >= -1 && vertex.ScreenZ() <= 1) ? (vertex.ScreenZ() + 1) / 2 * INT_MAX - 1 : INT_MAX;
 	return Eigen::Vector3i((vertex.ScreenX() + 1) / 2 * width, (vertex.ScreenY() - 1) / 2 * -height, z);
 }
 
-void LightlessFragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
+void FragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
 	int y_max = v2.y();
 	float m1 = static_cast<float>(v2.x() - v1.x()) / (v2.y() - v1.y());
@@ -104,7 +106,7 @@ void LightlessFragmentShader::FillBottomFlatTriangle(Eigen::Vector3i v1, Eigen::
 	}
 }
 
-void LightlessFragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
+void FragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords)
 {
 	int y_min = v2.y();
 	float m1 = static_cast<float>(v1.x() - v3.x()) / (v1.y() - v3.y());
@@ -121,7 +123,7 @@ void LightlessFragmentShader::FillTopFlatTriangle(Eigen::Vector3i v1, Eigen::Vec
 	}      
 }
 
-void LightlessFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
+void FragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
 {
 	for (int x = fmax(0, x1); x < fmin(x2, width); ++x)
 	{
@@ -137,7 +139,7 @@ void LightlessFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v
 	}
 }
 
-Eigen::RowVector3f LightlessFragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)
+Eigen::RowVector3f FragmentShader::GetBarycentricCoordinates(const Eigen::Vector3i& v1, const Eigen::Vector3i& v2, const Eigen::Vector3i& v3, int x, int y)
 {
 	Eigen::Vector2f p(x, y), a(v1.x(), v1.y()), b(v2.x(), v2.y()), c(v3.x(), v3.y());
 	Eigen::Vector2f t0 = b - a, t1 = c - a, t2 = p - a;
@@ -152,14 +154,14 @@ Eigen::RowVector3f LightlessFragmentShader::GetBarycentricCoordinates(const Eige
 	return Eigen::Vector3f(1.0f - v - w, v, w);
 }
 
-FlatFragmentShader::FlatFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)
+FlatFragmentShader::FlatFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : FragmentShader(width, height, pixel_data), lighting_model(lighting_model)
 {
 }
 
 void FlatFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
 	material = mesh.material;
-	LightlessFragmentShader::Paint(mesh, vertices);
+	FragmentShader::Paint(mesh, vertices);
 }
 
 void FlatFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
@@ -168,17 +170,17 @@ void FlatFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>
 	auto pos = (v1.original_coords + v2.original_coords + v3.original_coords) / 3;
 	auto n = (v1.normal + v2.normal + v3.normal) / 3;
 	color = lighting_model.GetColor(material, pos, n);
-	LightlessFragmentShader::Paint(face, vertices);
+	FragmentShader::Paint(face, vertices);
 }
 
-GouraudFragmentShader::GouraudFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)
+GouraudFragmentShader::GouraudFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : FragmentShader(width, height, pixel_data), lighting_model(lighting_model)
 {
 }
 
 void GouraudFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
 	material = mesh.material;
-	LightlessFragmentShader::Paint(mesh, vertices);
+	FragmentShader::Paint(mesh, vertices);
 }
 
 void GouraudFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
@@ -195,7 +197,7 @@ void GouraudFragmentShader::Paint(const Face& face, const std::vector<ShadedVert
 		lighting_model.GetColor(material, shaded_vertices[1].original_coords, shaded_vertices[1].normal),
 		lighting_model.GetColor(material, shaded_vertices[2].original_coords, shaded_vertices[2].normal);
 	interpolation_matrix.transposeInPlace();
-	LightlessFragmentShader::Paint(face, vertices);
+	FragmentShader::Paint(face, vertices);
 }
 
 void GouraudFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
@@ -216,14 +218,14 @@ void GouraudFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2,
 	}
 }
 
-PhongFragmentShader::PhongFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : LightlessFragmentShader(width, height, pixel_data), lighting_model(lighting_model)
+PhongFragmentShader::PhongFragmentShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) : FragmentShader(width, height, pixel_data), lighting_model(lighting_model)
 {
 }
 
 void PhongFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
 	material = mesh.material;
-	LightlessFragmentShader::Paint(mesh, vertices);
+	FragmentShader::Paint(mesh, vertices);
 }
 
 void PhongFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex>& vertices)
@@ -241,7 +243,7 @@ void PhongFragmentShader::Paint(const Face& face, const std::vector<ShadedVertex
 		shaded_vertices[0].normal, shaded_vertices[1].normal, shaded_vertices[2].normal;
 	position_interp_matrix.transposeInPlace();
 	normal_interp_matrix.transposeInPlace();
-	LightlessFragmentShader::Paint(face, vertices);
+	FragmentShader::Paint(face, vertices);
 }
 
 void PhongFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, Eigen::Vector3i v3, const Eigen::Vector3f& z_coords, float x1, float x2, int y)
@@ -267,7 +269,7 @@ void PhongFragmentShader::DrawScanline(Eigen::Vector3i v1, Eigen::Vector3i v2, E
 
 void ClickMapFragmentShader::Paint(const Mesh& mesh, const std::vector<ShadedVertex>& vertices)
 {
-	LightlessFragmentShader::Paint(mesh, vertices);
+	FragmentShader::Paint(mesh, vertices);
 	counter++;
 }
 

@@ -39,6 +39,19 @@ enum CameraNumber
 	OBJECT_CAMERA = 2
 };
 
+enum LightingModelType
+{
+	L_PHONG = 0,
+	L_BLINN_PHONG = 1
+};
+
+enum FragmentShaderType
+{
+	S_FLAT = 0,
+	S_GOURAUD = 1,
+	S_PHONG = 2
+};
+
 class Window
 {
 public:
@@ -46,6 +59,8 @@ public:
 	Window(const Window& _other) = delete;
 	Window& operator=(const Window& _other) = delete;
 	void Show();
+	void RenderMessage() const;
+	void RenderMeshes(FragmentShader& fragment_shader);
 	void RenderScene(bool click_map);
 	void RenderClickMap();
 	~Window();
@@ -61,6 +76,9 @@ private:
 	WindowMessage* message;
 	StateManager state_manager;
 	CameraNumber camera_number = STATIC_CAMERA;
+	LightingModelType lighting_model = L_PHONG;
+	FragmentShaderType shader_type = S_FLAT;
+
 	std::vector<unsigned char> pixel_data;
 	std::vector<unsigned char> click_map;
 	
@@ -70,6 +88,8 @@ private:
 
 	void PrepareCameras() const;
 	void FollowTarget(Eigen::Vector3f follow_position) const;
+	FragmentShader* GetShader(int width, int height, std::vector<unsigned char>& pixel_data, const LightingModel& lighting_model) const;
+	LightingModel* GetLightingModel(const std::vector<Light>& lights, const Camera& camera) const;
 
 	// events
 	void MouseButtonUp(SDL_MouseButtonEvent e);
