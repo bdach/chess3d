@@ -2,9 +2,12 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{helvet}
 \usepackage{verbatim}
+\usepackage{keystroke}
 \usepackage{hyperref}
 \usepackage[a4paper,margin=1in]{geometry}
 \usepackage[polish]{babel}
@@ -23,7 +26,7 @@
 	\vspace{0.5cm}
 	{\Large Bartłomiej Dach \par}
 	\vspace{1.5cm}
-	{\Large Wersja 1.1 \par}
+	{\Large Wersja 1.2 \par}
 	\vspace{1.5cm}
 	{\Large \today \par}
 \end{titlepage}
@@ -37,6 +40,8 @@ Lista zmian w dokumencie:
 	14.12.2016 & Bartłomiej Dach & Dodanie specyfikacji wymagań & 1.0 \\
 	\hline
 	15.12.2016 & Bartłomiej Dach & Rozszerzenie opisu biznesowego, dodanie szkicu architektury & 1.1 \\
+	\hline
+	15.01.2017 & Bartłomiej Dach & Dodanie wymagań, instrukcji instalacji oraz obsługi aplikacji & 1.2 \\
 	\hline
 \end{tabularx}
 \end{table}
@@ -78,7 +83,7 @@ Renderowanie sceny powinno odbywać się w trybie \emph{software}, tzn. obliczen
 \begin{itemize}
 	\item transformacja współrzędnych (współrzędne świata, kamery),
 	\item rzut na płaszczyznę,
-	\item obcinanie wielokątów oraz eliminacja ścian tylnych,
+	\item obcinanie wielokątów oraz porządkowanie ich względem odległości od kamery,
 	\item wypełnianie wielokątów zgodnie z przyjętym modelem oświetlenia.
 \end{itemize}
 
@@ -190,7 +195,7 @@ Ze względu na spełniane funkcjonalności aplikacja została podzielona na komp
 Odpowiada za wczytanie z dysku danych związanych ze sceną, takich, jak: dane modeli wykorzystanych w scenie, położenie i parametry oświetlenia obiektów. Zawiera on również klasy reprezentujące te obiekty, których używa komponent obliczeniowy. Proces wczytywania modeli będzie wspomagany przez bibliotekę \emph{Assimp} \cite{assimp}.
 
 \paragraph{Komponent obliczeniowy}
-Jego rolą jest przetworzenie wczytanych z plików wejściowych danych i dokonanie właściwych obliczeń związanych z wizualizacją, tj. zmianę układów współrzędnych, rzutu na płaszczyznę oraz symulację oświetlenia. Do wykonywania obliczeń wykorzystana zostanie biblioteka \emph{Generic Graphics Toolkit} \cite{ggt}.
+Jego rolą jest przetworzenie wczytanych z plików wejściowych danych i dokonanie właściwych obliczeń związanych z wizualizacją, tj. zmianę układów współrzędnych, rzutu na płaszczyznę oraz symulację oświetlenia. Do wykonywania obliczeń wykorzystana zostanie biblioteka \emph{Eigen} \cite{eigen}.
 
 \paragraph{Komponent wyświetlania}
 Wykorzystuje obliczenia wykonane przez powyższy komponent do właściwego tworzenia obrazu dwuwymiarowego i wyświetla go na ekranie. Ponadto obsługuje polecenia użytkownika, wydawane za pośrednictwem interfejsu graficznego, i przekazuje informacje o nich do pozostałych komponentów. W tym komponencie wykorzystane będą funkcjonalności biblioteki \emph{Simple DirectMedia Layer 2.0} \cite{sdl}.
@@ -199,67 +204,163 @@ W celu uzyskania jak największej wydajności, aplikacja tworzona będzie w jęz
 
 \newpage
 
-\begin{comment}
 \section{Dokumentacja końcowa (powykonawcza)}
 
 \subsection{Wymagania systemowe}
-% Punkt obowiązkowy.
-%
-% Rozdział powinien zawierać wymagania systemowe, wymagane oprogramowanie zewnętrzne
-% (RDBMS, etc.)
+
+Do funkcjonowania programu wymagany jest system Microsoft Windows Vista lub nowszy, działający w architekturze 64-bitowej.
 
 \subsection{Biblioteki wraz z określeniem licencji}
-% Punkt obowiązkowy.
-%
-% Rozdział powinien zawierać listę użytych bibliotek i komponentów firm trzecich wraz z ich licencjami.
+
+Poniższa tabela przedstawia listę użytych w projekcie bibliotek:
+
+\begin{table}[H]
+	\begin{tabularx}{\textwidth}{|r|l|X|l|c|}
+		\hline
+		\textbf{Nr} & \textbf{Komponent, wersja} & \textbf{Opis} & \textbf{Licencja} & \\
+		\hline
+		1 &
+		Assimp 3.0.0 &
+		Używana do importowania modeli zapisanych w wielu formatach używanych przez popularne narzędzia CAD/CAM. &
+		\mbox{\hyperref[abbr:bsd]{BSD}} 3-Clause &
+		\cite{assimp} \\
+		\hline
+		2 &
+		Eigen 3.2.9 &
+		Biblioteka do obliczeń algebry liniowej; wspiera operacje na wektorach oraz macierzach. &
+		\mbox{\hyperref[abbr:mpl]{MPL}} 2.0 &
+		\cite{eigen} \\
+		\hline
+		3 &
+		FreeType 2.6.2.1 &
+		Wspiera ładowanie i wyświetlanie na ekranie czcionek w formacie TrueType (\texttt{.ttf}). &
+		FreeType License &
+		\cite{freetype} \\
+		\hline
+		4 &
+		SDL 2.0.5 &
+		Wieloplatformowa biblioteka umożliwiająca niskopoziomowy dostęp do myszy, klawiatury oraz wyświetlanie obrazu 2D na ekranie. &
+		zlib license &
+		\cite{sdl} \\
+		\hline
+		5 &
+		SDL\_ttf 2.0.14 &
+		Biblioteka integrująca FreeType oraz SDL. &
+		zlib license &
+		\cite{sdl_ttf} \\
+		\hline
+	\end{tabularx}
+\end{table}
 
 \subsection{Instrukcja instalacji}
-% Punkt obowiązkowy.
-%
-% Niniejszy rozdział powinien kompletną instrukcję instalacji systemu/aplikacji umożliwiająca osobie
-% oceniającej implementację danego rozwiązania. Uwaga: instrukcja powinna być dostoswana do
-% instalacji na czystym systemie operacyjnym.
+
+W celu zainstalowania aplikacji na dysku twardym, należy uruchomić dołączony ze źródłami projektu plik wykonywalny \texttt{installer.exe}, a następnie postępować zgodnie z instrukcjami wyświetlonymi na ekranie.
 
 \subsection{Instrukcja uruchomienia}
-% Punkt obowiązkowy.
-% 
-% Niniejszy rozdział powinien zawierać kompletną instrukcję uruchomienia systemu/aplikacji
-% umożliwiającą osobie oceniającej weryfikację poprawności działania systemu.
+
+Po zakończeniu instalacji należy uruchomić plik wykonywalny \texttt{Chess3D.exe}, znajdujący się w katalogu instalacji programu.
 
 \subsection{Instrukcja użycia}
-% Punkt obowiązkowy.
-%
-% Niniejszy rozdział powinien zawierać kompletną instrukcję użycia (manual) systemu/aplikacji
-% umożliwiająca osobie oceniającej weryfikację poprawności działania systemu.
 
-\subsection{Instrukcja utrzymania}
-% Punkt obowiązkowy.
-%
-% Niniejszy rozdział powinien zawierać kompletną instrukcję utrzymania systemu obejmującą procedury
-% włączenia, wyłączenia systemu oraz procedury backup/restore.
+Aplikacja Chess3D składa się z pojedynczego okna, na którym wyświetlana jest wizualizacja z pionkami oraz szachownicą.
+
+\paragraph{Wykonywanie ruchów}
+Aby wykonać ruch jednym z pionków, należy kliknąć na dowolny z nich, a następnie kliknąć na żądane pole. Wówczas rozpocznie się animacja przesuwania się pionka na swoje miejsce. Nie można ruszać wielu pionków jednocześnie; należy odczekać, aż animacja się zakończy przed dokonaniem kolejnego ruchu.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/01_pawn_select.png}
+		\caption{Wybór pionka}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/02_move_complete.png}
+		\caption{Wykonany ruch}
+	\end{subfigure}
+	\caption{Wykonanie pojedynczego ruchu przez użytkownika}
+\end{figure}
+
+\paragraph{Zmiana kamery}
+W dowolnym momencie można dokonać zmiany kamery, wciskając jeden z następujących klawiszy na klawiaturze:
+\begin{itemize}
+	\item \keystroke{1} -- kamera statyczna, z widokiem na całą planszę,
+	\item \keystroke{2} -- kamera o stałym położeniu, śledząca ostatnio poruszony pionek,
+	\item \keystroke{3} -- kamera ruchoma, związana z ostatnio poruszonym pionkiem.
+\end{itemize} 
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/03_static.png}
+		\caption{Kamera statyczna (\keystroke{1})}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/04_follow.png}
+		\caption{Kamera śledząca (\keystroke{2})}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/05_object.png}
+		\caption{Kamera obiektu (\keystroke{3})}
+	\end{subfigure}
+	\caption{Dostępne warianty kamery}
+\end{figure}
+
+\paragraph{Zmiana modelu oświetlenia}
+Podczas działania aplikacji można zmieniać model oświetlenia używany do liczenia kolorów poszczególnych obiektów za pomocą klawiszy:
+\begin{itemize}
+	\item \keystroke{Q} -- model Blinna-Phonga \cite{blinn77},
+	\item \keystroke{W} -- model Phonga \cite{phong75}.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/06_blinn-phong.png}
+		\caption{Model Blinna-Phonga (\keystroke{Q})}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/07_phong.png}
+		\caption{Model Phonga (\keystroke{W})}
+	\end{subfigure}
+	\caption{Dostępne modele oświetlenia}
+\end{figure}
+
+\paragraph{Zmiana typu cieniowania}
+W podobny sposób można modyfikować wykorzystywany w scenie model cieniowania, za pomocą klawiszy:
+\begin{itemize}
+	\item \keystroke{E} -- cieniowanie płaskie,
+	\item \keystroke{R} -- cieniowanie Gouraud \cite{gouraud71},
+	\item \keystroke{T} -- cieniowanie Phonga.
+\end{itemize}
+\subparagraph{Uwaga} Wybrany sposób cieniowania ma znaczący wpływ na prędkość animacji.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/08_flat.png}
+		\caption{Cieniowanie płaskie (\keystroke{E})}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/09_gouraud.png}
+		\caption{Cieniowanie Gouraud (\keystroke{R})}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\textwidth]{screenshots/10_phong_shading.png}
+		\caption{Cieniowanie Phonga (\keystroke{T})}
+	\end{subfigure}
+	\caption{Dostępne warianty kamery}
+\end{figure}
 
 \subsection{Raport odstępstw od specyfikacji wymagań}
-% Punkt obowiązkowy.
 
-\subsection{Dokumentacja usług Web Services}
-% Punkt obowiązkowy
-%
-% Niniejszy rozdział powinien w przypadku, gdy system udostępnia publiczne usługi web services
-% powinien zawierać dokumentację usług zamieszczone w formie opisowej lub np. wg specyfikacji
-% swagger.
+\paragraph{Rezygnacja z implementacji widoku pełnoekranowego}
+\subparagraph{Dotyczy:} Wymaganie niefunkcjonalne -- tryby: okienkowy oraz pełnoekranowy
+\subparagraph{Zmiana:} Rezygnacja z realizacji wymagania
+\subparagraph{Uzasadnienie:} Wymaganie ma stosunkowo niskie znaczenie, a jego realizacja spowodowałaby spadek wydajności aplikacji.
 
 \section{Dokumentacja końcowa (powykonawcza) -- punkty wymagane przez prowadzącego zajęcia}
 
 \subsection{Pseudokod}
-
-\subsection{Diagramy sekwencji}
-% Punkt obowiązkowy
-%
-% W przypadku projektów półsemestralnych lub dłuższych: w przypadku, gdy system składa się z
-% komponentów rozproszonych należy dołączyć diagram(y) sekwencji. Rozdział zawierać powinien
-% zawierać diagramy sekwencji opisujące komunikację pomiędzy systemami lub komponentami
-% systemu. Należy w nim uwzględnić wszystkie przepływy komunikatów pomiędzy komponentami
-% systemu lub systemami.
 
 \subsection{Model danych}
 % W przypadku projektów półsemestralnych lub dłuższych, gdy system składuje dane, należy opisać
@@ -282,9 +383,14 @@ W celu uzyskania jak największej wydajności, aplikacja tworzona będzie w jęz
 % W przypadku projektów półsemestralnych np. realizowanych w ramach projektu zespołowego.
 % Rozdział powinien zawierać scenariusze testów akceptacyjnych nawiązujących do wymagań
 % funkcjonalnych i niefunkcjonalnych systemu i wyniki ich przeprowadzenia.
-\end{comment}
 
 \section{Lista użytych skrótów}
+
+\label{abbr:bsd}
+\paragraph{BSD} Berkeley Software Distribution
+
+\label{abbr:mpl}
+\paragraph{MPL} Mozilla Public License
 
 \label{abbr:gpu}
 \paragraph{GPU} Graphics Processing Unit
@@ -303,9 +409,13 @@ W celu uzyskania jak największej wydajności, aplikacja tworzona będzie w jęz
 	Proceedings of the 4th Annual Conference on Computer Graphics and Interactive Techniques,
 	pp. 192-198.
 
-\bibitem{ggt}
-	Generic Graphics Toolkit,
-	\url{http://ggt.sourceforge.net/}
+\bibitem{eigen}
+	Eigen,
+	\url{http://eigen.tuxfamily.org/}
+
+\bibitem{freetype}
+	FreeType,
+	\url{https://www.freetype.org/}
 	
 \bibitem{gouraud71}
 	Henri Gouraud,
@@ -324,5 +434,9 @@ W celu uzyskania jak największej wydajności, aplikacja tworzona będzie w jęz
 \bibitem{sdl}
 	Simple DirectMedia Layer,
 	\url{https://www.libsdl.org/}
+
+\bibitem{sdl_ttf}
+	SDL\_ttf 2.0,
+	\url{https://www.libsdl.org/projects/SDL_ttf/}
 \end{thebibliography}
 \end{document}
