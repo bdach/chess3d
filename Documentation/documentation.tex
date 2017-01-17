@@ -6,6 +6,7 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{helvet}
+\usepackage{hhline}
 \usepackage{verbatim}
 \usepackage{keystroke}
 \usepackage{hyperref}
@@ -26,7 +27,7 @@
 	\vspace{0.5cm}
 	{\Large Bartłomiej Dach \par}
 	\vspace{1.5cm}
-	{\Large Wersja 1.2 \par}
+	{\Large Wersja 1.3 \par}
 	\vspace{1.5cm}
 	{\Large \today \par}
 \end{titlepage}
@@ -42,6 +43,8 @@ Lista zmian w dokumencie:
 	15.12.2016 & Bartłomiej Dach & Rozszerzenie opisu biznesowego, dodanie szkicu architektury & 1.1 \\
 	\hline
 	15.01.2017 & Bartłomiej Dach & Dodanie wymagań, instrukcji instalacji oraz obsługi aplikacji & 1.2 \\
+	\hline
+	17.01.2017 & Bartłomiej Dach & Dodanie scenariuszów i wyników testów akceptacyjnych, uszczegółowienie architektury & 1.3 \\
 	\hline
 \end{tabularx}
 \end{table}
@@ -192,15 +195,46 @@ Ze względu na spełniane funkcjonalności aplikacja została podzielona na komp
 \end{figure}
 
 \paragraph{Komponent danych}
-Odpowiada za wczytanie z dysku danych związanych ze sceną, takich, jak: dane modeli wykorzystanych w scenie, położenie i parametry oświetlenia obiektów. Zawiera on również klasy reprezentujące te obiekty, których używa komponent obliczeniowy. Proces wczytywania modeli będzie wspomagany przez bibliotekę \emph{Assimp} \cite{assimp}.
+Odpowiada za wczytanie z dysku danych związanych ze sceną, takich, jak: dane modeli wykorzystanych w scenie, położenie i parametry oświetlenia obiektów. Zawiera on również klasy reprezentujące te obiekty, których używa komponent obliczeniowy. Proces wczytywania modeli jest wspomagany przez bibliotekę \emph{Assimp} \cite{assimp}.
 
 \paragraph{Komponent obliczeniowy}
-Jego rolą jest przetworzenie wczytanych z plików wejściowych danych i dokonanie właściwych obliczeń związanych z wizualizacją, tj. zmianę układów współrzędnych, rzutu na płaszczyznę oraz symulację oświetlenia. Do wykonywania obliczeń wykorzystana zostanie biblioteka \emph{Eigen} \cite{eigen}.
+Jego rolą jest przetworzenie wczytanych z plików wejściowych danych i dokonanie właściwych obliczeń związanych z wizualizacją, tj. zmianę układów współrzędnych, rzutu na płaszczyznę oraz symulację oświetlenia. Do wykonywania obliczeń wykorzystana zotała biblioteka \emph{Eigen} \cite{eigen}.
 
 \paragraph{Komponent wyświetlania}
-Wykorzystuje obliczenia wykonane przez powyższy komponent do właściwego tworzenia obrazu dwuwymiarowego i wyświetla go na ekranie. Ponadto obsługuje polecenia użytkownika, wydawane za pośrednictwem interfejsu graficznego, i przekazuje informacje o nich do pozostałych komponentów. W tym komponencie wykorzystane będą funkcjonalności biblioteki \emph{Simple DirectMedia Layer 2.0} \cite{sdl}.
+Wykorzystuje obliczenia wykonane przez powyższy komponent do właściwego tworzenia obrazu dwuwymiarowego i wyświetla go na ekranie. Ponadto obsługuje polecenia użytkownika, wydawane za pośrednictwem interfejsu graficznego, i przekazuje informacje o nich do pozostałych komponentów. W tym komponencie wykorzystane zostały funkcjonalności biblioteki \emph{Simple DirectMedia Layer 2.0} \cite{sdl}.
 
-W celu uzyskania jak największej wydajności, aplikacja tworzona będzie w języku C++.
+W celu uzyskania jak największej wydajności, aplikacja stworzona została w języku C++.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{frame-render-activity.pdf}
+	\caption{Diagram aktywności ukazujący przebieg renderowania pojedynczej klatki}
+\end{figure}
+
+Główna pętla aplikacji składa się z następujących elementów:
+\begin{itemize}
+	\item obsługa nadchodzących zdarzeń myszy i klawiatury,
+	\item jeśli jest to potrzebne, odrysowanie sceny.
+\end{itemize}
+Na rysowanie sceny składają się następujące kroki:
+\begin{enumerate}
+	\item użycie \emph{vertex shadera} w celu transformacji współrzędnych w układzie świata do współrzędnych w układzie kamery,
+	\item użycie wybranego przez użytkownika \emph{fragment shadera} w celu zapisania kolorów kolejnych pikseli do bufora. Dla każdego piksela trójkątów poszczególnych modeli wykonywane są następujące kroki:
+	\begin{itemize}
+		\item interpolacja współrzędnych w układzie kamery na podstawie współrzędnych piksela na ekranie,
+		\item sprawdzenie (i ewentualnie nadpisanie) z-bufora,
+		\item jeśli bufor został nadpisany, wybrany model oświetlenia jest użyty do obliczenia finalnego koloru danego piksela. 
+	\end{itemize}
+	\item jeżeli nie trwa animacja, używany jest dodatkowo specjalny \emph{fragment shader}, aby wyliczyć tzw. \emph{click mapę}. Jest to tekstura (bufor w pamięci), który dla każdego piksela ekranu zapisuje indeks obiektu, który zajmuje ten piksel i jest najbliżej ekranu. W ten sposób sprawdzenie, jaki pionek i pole zostały trafione, sprowadza się do wczytania wartości z odpowiedniego miejsca tego bufora. 
+\end{enumerate}
+
+Obsługa zdarzeń związanych z myszą odbywa się za pomocą prostej maszyny stanów, przedstawionej na poniższym diagramie.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=7cm]{window-state.pdf}
+	\caption{Diagram stanów -- obsługa zdarzeń myszy przez aplikację}
+\end{figure}
+W momencie wybrania pionka w stanie ,,Wybrany pionek'', wyświetlana jest wiadomość o błędzie.
 
 \newpage
 
@@ -360,29 +394,53 @@ W podobny sposób można modyfikować wykorzystywany w scenie model cieniowania,
 
 \section{Dokumentacja końcowa (powykonawcza) -- punkty wymagane przez prowadzącego zajęcia}
 
-\subsection{Pseudokod}
+%\subsection{Pseudokod}
 
-\subsection{Model danych}
-% W przypadku projektów półsemestralnych lub dłuższych, gdy system składuje dane, należy opisać
-% model danych. Model danych powinien być wyrażony przez diagram entity relationship w przypadku
-% relacyjnej bazy danych. Zalecane jest wówczas opisanie znaczenia poszczególnych relacji, jak
-% również czytelne oznaczenie rodzaju relacji (np. jeden do wielu) oraz kluczy głównych i kluczy obcych.
-% W przypadku wykorzystania platform nierelacyjnych np. platform NoSQL lub składowania danych w
-% plikach Apache Hadoop należy przedstawić opis konwencji zapisu danych. Jest to szczególnie istotne,
-% gdy model danych jest prowadzony w trybie tzw. schema-on-read tzn. nie jest egzekwowany przez
-% platformę składowania danych, a zależy wyłącznie od konwencji stosowanej przez aplikację np.
-% konwencji nazewnictwa kolumn, treści wpisów w formacie JSON lub formatu sekwencji plików
-% tworzonych w systemie plików HDFS.
+\subsection{Scenariusz i wyniki testów akceptacyjnych}
 
-\subsection{Scenariusz testów akceptacyjnych}
-% W przypadku projektów półsemestralnych np. realizowanych w ramach projektu zespołowego.
-% Rozdział powinien zawierać scenariusze testów akceptacyjnych nawiązujących do wymagań
-% funkcjonalnych i niefunkcjonalnych systemu.
-
-\subsection{Raport z przeprowadzonych testów}
-% W przypadku projektów półsemestralnych np. realizowanych w ramach projektu zespołowego.
-% Rozdział powinien zawierać scenariusze testów akceptacyjnych nawiązujących do wymagań
-% funkcjonalnych i niefunkcjonalnych systemu i wyniki ich przeprowadzenia.
+\begin{tabularx}{\textwidth}{|l|X|}
+	\hline
+	\textbf{Nazwa testu} & Poruszanie pionkiem \\
+	\hline
+	\textbf{Opis} & Wybranie dowolnego pionka znajdującego się na planszy przez kliknięcie lewym przyciskiem myszy, a następnie wybranie dowolnego pola planszy. \\
+	\hline
+	\textbf{Oczekiwany wynik} & Rozpoczęcie się animacji przesuwania się wybranego pionka na wybrane pole. \\
+	\hline
+	\textbf{Wynik testu} & Pozytywny \\
+	\hhline{==}
+	\textbf{Nazwa testu} & Zmiana kamery \\
+	\hline
+	\textbf{Opis} & Wciśnięcie przycisków \keystroke{1}, \keystroke{2}, \keystroke{3} na klawiaturze podczas działania programów. \\
+	\hline
+	\textbf{Oczekiwany wynik} & Zmiana kamery używanej do wyświetlania sceny. \\
+	\hline
+	\textbf{Wynik testu} & Pozytywny \\
+	\hhline{==}
+	\textbf{Nazwa testu} & Zmiana oświetlenia \\
+	\hline
+	\textbf{Opis} & Wciśnięcie przycisków \keystroke{Q}, \keystroke{W} na klawiaturze podczas działania programów. \\
+	\hline
+	\textbf{Oczekiwany wynik} & Widoczna zmiana obrazu wyświetlanego na ekranie, oraz wiadomość potwierdzająca zmianę modelu oświetlenia używanego w renderingu sceny. \\
+	\hline
+	\textbf{Wynik testu} & Pozytywny \\
+	\hhline{==}
+	\textbf{Nazwa testu} & Zmiana modelu cieniowania \\
+	\hline
+	\textbf{Opis} & Wciśnięcie przycisków \keystroke{E}, \keystroke{R}, \keystroke{T} na klawiaturze podczas działania programów. \\
+	\hline
+	\textbf{Oczekiwany wynik} & Widoczna zmiana obrazu wyświetlanego na ekranie, oraz wiadomość potwierdzająca zmianę modelu cieniowania sceny. \\
+	\hline
+	\textbf{Wynik testu} & Pozytywny \\
+	\hhline{==}
+	\textbf{Nazwa testu} & Sprawdzenie zużycia pamięci \\
+	\hline
+	\textbf{Opis} & Uruchomienie programu oraz menedżera zadań, sprawdzenie zużycia pamięci aplikacji. \\
+	\hline
+	\textbf{Oczekiwany wynik} & Zużycie pamięci RAM przez aplikację nie przekraczające 500 MB. \\
+	\hline
+	\textbf{Wynik testu} & Pozytywny \\
+	\hline
+\end{tabularx}
 
 \section{Lista użytych skrótów}
 
